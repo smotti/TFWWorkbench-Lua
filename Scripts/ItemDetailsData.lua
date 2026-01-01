@@ -1,10 +1,8 @@
 local json = require("json")
 local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
+local DataTableParser = require("DataTableParser")
 local Settings = require("Settings")
-local Converters = require("Converters")
-
-local DumpFile = "ue4ss/Mods/TFWWorkbench/Dumps/ItemDetailsData.json"
 
 local DataTable = {}
 
@@ -12,7 +10,7 @@ local function Log(message, funcName)
     Utils.Log(message, "ItemDetailsData", funcName)
 end
 
-local function InitHandler(dataTable)
+local function Init(dataTable)
     DataTable.__table = dataTable
     DataTable.__name = "ItemDetailsData"
     DataTable.__kismetlib = UEHelpers.GetKismetSystemLibrary()
@@ -27,7 +25,7 @@ local function InitHandler(dataTable)
     end
 end
 
-function PrintTable(o)
+local function PrintTable(o)
    if type(o) == 'table' then
       local s = '{ '
       for k,v in pairs(o) do
@@ -38,62 +36,6 @@ function PrintTable(o)
    else
       return tostring(o)
    end
-end
-
-local function ToJson(value)
-    -- That needs to be refactored, because this ToJson function will be pulled out into
-    -- a dedicated modules for common parsing functionality
-    local kismetLib = DataTable.__kismetlib
-
-    if value == nil then
-        Log("value == nil", "ToJson")
-        return nil
-    end
-
-    local valueType = type(value)
-
-    if valueType == "string" or valueType == "number" or valueType == "boolean" then
-        Log(string.format("non-custom type: %s\n", valueType), "ToJson")
-        return value
-    elseif valueType == "userdata" then
-        local str = tostring(value)
-        Log(string.format("userdata type: %s\n", str), "ToJson")
-
-        if str:match("TSoftObjectPtr") then
-            local success, result = pcall(function()
-                return kismetLib:Conv_SoftObjectReferenceToString(value)
-            end)
-            if success then
-                Log(string.format("TSoftObjectPtr: %s\n", result:ToString()), "ToJson")
-                return result:ToString()
-            end
-        elseif str:match("UScriptStruct") then
-            local result = {}
-            value:ForEachProperty(function(property)
-                local propertyName = property:GetFName():ToString()
-                Log(string.format("UScriptStruct Property: %s\n", propertyName), "ToJson")
-                result[propertyName] = ToJson(value[propertyName])
-            end)
-            return result
-        elseif str:match("TArray") then
-            local result = {}
-            value:ForEach(function(index, element)
-                result[index] = ToJson(element:get())
-                Log(string.format("TArray: %d - %s\n", index, tostring(result[index])), "ToJson")
-            end)
-            return result
-        elseif str:match("UDataTable") then
-            Log(string.format("UDataTable: %s\n", string.match(value:GetFullName(), "^DataTable%s+(.*)")), "ToJson")
-            return string.match(value:GetFullName(), "^DataTable%s+(.*)")
-        end
-
-        --- Try ToString method for FName, FText, and FString
-        local success, result = pcall(function() return value:ToString() end)
-        if success and result then
-            Log(string.format("ToString(): %s\n", result), "ToJson")
-            return result
-        end
-    end
 end
 
 local function ToJsonItemMeshTransform(itemMeshTransform)
@@ -145,39 +87,40 @@ end
 
 ---@param data FInventoryItemDetails
 local function ParseFInventorItemDetails(data)
+    local kismetLib = DataTable.__kismetlib
     return {
-        Category = ToJson(data.Category),
-        ItemName = ToJson(data.ItemName),
-        ItemDescription = ToJson(data.ItemDescription),
-        ItemMesh = ToJson(data.ItemMesh),
+        Category = DataTableParser.ToJson(data.Category, kismetLib),
+        ItemName = DataTableParser.ToJson(data.ItemName, kismetLib),
+        ItemDescription = DataTableParser.ToJson(data.ItemDescription, kismetLib),
+        ItemMesh = DataTableParser.ToJson(data.ItemMesh, kismetLib),
         ItemMeshTransform = ToJsonItemMeshTransform(data.ItemMeshTransform),
         -- We don't care about these two properties as they're always nil
         --ExtraMeshs = nil,
         --ExtraMeshTransform = nil,
-        ItemLootRadius = ToJson(data.ItemLootRadius),
-        ItemIconRadius = ToJson(data.ItemIconRadius),
-        ItemIcon = ToJson(data.ItemIcon),
+        ItemLootRadius = DataTableParser.ToJson(data.ItemLootRadius, kismetLib),
+        ItemIconRadius = DataTableParser.ToJson(data.ItemIconRadius, kismetLib),
+        ItemIcon = DataTableParser.ToJson(data.ItemIcon, kismetLib),
         ItemType = ToJsonEItemCategory(data.ItemType),
-        ItemSubtype = ToJson(data.ItemSubtype),
-        ExtraDetailsRowName = ToJson(data.ExtraDetailsRowName),
-        LootSound = ToJson(data.LootSound),
-        DropSound = ToJson(data.DropSound),
-        ItemSize = ToJson(data.ItemSize),
-        Volume = ToJson(data.Volume),
-        Weight = ToJson(data.Weight),
-        ValueRow = ToJson(data.ValueRow),
+        ItemSubtype = DataTableParser.ToJson(data.ItemSubtype, kismetLib),
+        ExtraDetailsRowName = DataTableParser.ToJson(data.ExtraDetailsRowName, kismetLib),
+        LootSound = DataTableParser.ToJson(data.LootSound, kismetLib),
+        DropSound = DataTableParser.ToJson(data.DropSound, kismetLib),
+        ItemSize = DataTableParser.ToJson(data.ItemSize, kismetLib),
+        Volume = DataTableParser.ToJson(data.Volume, kismetLib),
+        Weight = DataTableParser.ToJson(data.Weight, kismetLib),
+        ValueRow = DataTableParser.ToJson(data.ValueRow, kismetLib),
         -- Ignoring them because they are always 0
         --Value = ToJson(data.Value),
         --WaterValue = ToJson(data.WaterValue),
-        DropOnDeath = ToJson(data.DropOnDeath),
-        MaxStack = ToJson(data.MaxStack),
-        ExtraTagData = ToJson(data.ExtraTagData),
-        StartingStack = ToJson(data.StartingStack),
-        ConsumableAbility = ToJson(data.ConsumableAbility),
-        BattlepointsRowHandle = ToJson(data.BattlepointsRowHandle),
+        DropOnDeath = DataTableParser.ToJson(data.DropOnDeath, kismetLib),
+        MaxStack = DataTableParser.ToJson(data.MaxStack, kismetLib),
+        ExtraTagData = DataTableParser.ToJson(data.ExtraTagData, kismetLib),
+        StartingStack = DataTableParser.ToJson(data.StartingStack, kismetLib),
+        ConsumableAbility = DataTableParser.ToJson(data.ConsumableAbility, kismetLib),
+        BattlepointsRowHandle = DataTableParser.ToJson(data.BattlepointsRowHandle, kismetLib),
         TacCamHighlight = ToJsonTacCamHighlight(data.TacCamHighlight),
-        RareLootCategory = ToJson(data.RareLootCategory),
-        RareLootLocations = ToJson(data.RareLootLocations)
+        RareLootCategory = DataTableParser.ToJson(data.RareLootCategory, kismetLib),
+        RareLootLocations = DataTableParser.ToJson(data.RareLootLocations, kismetLib)
     }
 end
 
@@ -216,7 +159,7 @@ end
 
 -- Export module functions
 --DataTable.convertFInventoryItemDetails = convertFInventoryItemDetails
-DataTable.Init = InitHandler
+DataTable.Init = Init
 DataTable.DumpDataTable = DumpDataTable
 
 return DataTable
