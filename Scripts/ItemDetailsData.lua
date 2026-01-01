@@ -1,5 +1,6 @@
 local json = require("json")
 local UEHelpers = require("UEHelpers")
+local Utils = require("utils")
 local Settings = require("Settings")
 local Converters = require("Converters")
 
@@ -7,18 +8,22 @@ local DumpFile = "ue4ss/Mods/TFWWorkbench/Dumps/ItemDetailsData.json"
 
 local DataTable = {}
 
+local function Log(message, funcName)
+    Utils.Log(message, "ItemDetailsData", funcName)
+end
+
 local function InitHandler(dataTable)
     DataTable.__table = dataTable
     DataTable.__name = "ItemDetailsData"
     DataTable.__kismetlib = UEHelpers.GetKismetSystemLibrary()
     
     local dirs = IterateGameDirectories()
-    local modDirs = dirs.Game.Content.Paks.TFWWorkbench
+    local modDirs = dirs.Game.Content.Paks.Mods.TFWWorkbench
     if not modDirs then
-        print(string.format("[TFWWorkbench] No such directory Contents/Paks/TFWWorkbench\n"))
+        Utils.Log("No such directory Contents/Paks/TFWWorkbench", "InitHandler")
     else
         DataTable.__dumpFile = string.format("%s/Dumps/ItemDetailsData.json", modDirs.__absolute_path)
-        print(string.format("[TFWWorkbench] DumpFile: %s\n", DataTable.__dumpFile))
+        Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "InitHandler")
     end
 end
 
@@ -36,35 +41,37 @@ function PrintTable(o)
 end
 
 local function ToJson(value)
+    -- That needs to be refactored, because this ToJson function will be pulled out into
+    -- a dedicated modules for common parsing functionality
     local kismetLib = DataTable.__kismetlib
 
     if value == nil then
-        print("ToJson value == nil")
+        Log("value == nil", "ToJson")
         return nil
     end
 
     local valueType = type(value)
 
     if valueType == "string" or valueType == "number" or valueType == "boolean" then
-        print(string.format("[TFWWorkbench] ToJson non-custom type: %s\n", valueType))
+        Log(string.format("non-custom type: %s\n", valueType), "ToJson")
         return value
     elseif valueType == "userdata" then
         local str = tostring(value)
-        print(string.format("[TFWWorkbench] ToJson userdata type: %s\n", str))
+        Log(string.format("userdata type: %s\n", str), "ToJson")
 
         if str:match("TSoftObjectPtr") then
             local success, result = pcall(function()
                 return kismetLib:Conv_SoftObjectReferenceToString(value)
             end)
             if success then
-                print(string.format("[TFWWorkbench] ToJson TSoftObjectPtr: %s\n", result:ToString()))
+                Log(string.format("TSoftObjectPtr: %s\n", result:ToString()), "ToJson")
                 return result:ToString()
             end
         elseif str:match("UScriptStruct") then
             local result = {}
             value:ForEachProperty(function(property)
                 local propertyName = property:GetFName():ToString()
-                print(string.format("[TFWWorkbench] ToJson UScriptStruct Property: %s\n", propertyName))
+                Log(string.format("UScriptStruct Property: %s\n", propertyName), "ToJson")
                 result[propertyName] = ToJson(value[propertyName])
             end)
             return result
@@ -72,18 +79,18 @@ local function ToJson(value)
             local result = {}
             value:ForEach(function(index, element)
                 result[index] = ToJson(element:get())
-                print(string.format("[TFWWorkbench] ToJson TArray: %d - %s\n", index, tostring(result[index])))
+                Log(string.format("TArray: %d - %s\n", index, tostring(result[index])), "ToJson")
             end)
             return result
         elseif str:match("UDataTable") then
-            print(string.format("[TFWWorkbench] ToJson UDataTable: %s\n", string.match(value:GetFullName(), "^DataTable%s+(.*)")))
+            Log(string.format("UDataTable: %s\n", string.match(value:GetFullName(), "^DataTable%s+(.*)")), "ToJson")
             return string.match(value:GetFullName(), "^DataTable%s+(.*)")
         end
 
         --- Try ToString method for FName, FText, and FString
         local success, result = pcall(function() return value:ToString() end)
         if success and result then
-            print(string.format("[TFWWorkbench] ToJson ToString(): %s\n", result))
+            Log(string.format("ToString(): %s\n", result), "ToJson")
             return result
         end
     end
@@ -103,9 +110,9 @@ local function ToJsonItemMeshTransform(itemMeshTransform)
         end)
     end
 
-    print(string.format("[TFWWorkbench] ToJsonItemMeshTransform Rotation: %s\n", PrintTable(result.Rotation)))
-    print(string.format("[TFWWorkbench] ToJsonItemMeshTransform Translation: %s\n", PrintTable(result.Translation)))
-    print(string.format("[TFWWorkbench] ToJsonItemMeshTransform Scale3D: %s\n", PrintTable(result.Scale3D)))
+    Log(string.format("Rotation: %s\n", PrintTable(result.Rotation)), "ToJsonItemMeshTransform")
+    Log(string.format("Translation: %s\n", PrintTable(result.Translation)), "ToJsonItemMeshTransform")
+    Log(string.format("Scale3D: %s\n", PrintTable(result.Scale3D)), "ToJsonItemMeshTransform")
 
     return result
 end
@@ -120,7 +127,7 @@ local function ToJsonEItemCategory(itemCategory)
         [5] = "Dangle",
         [6] = "EItemCategory_Max"
     }
-    print(string.format("[TFWWorkbench] ToJsonEItemCategory ItemType: %s - %d\n", categories[itemCategory], itemCategory))
+    Log(string.format("ItemType: %s - %d\n", categories[itemCategory], itemCategory), "ToJsonEItemCategory")
     return categories[itemCategory]
 end
 
@@ -132,7 +139,7 @@ local function ToJsonTacCamHighlight(tacCamColor)
         [3] = "Yellow",
         [4] = "TacCamColours_Max"
     }
-    print(string.format("[TFWWorkbench] ToJsonTacCamHighlight TacCamHighlight: %s - %d\n", colors[tacCamColor], tacCamColor))
+    Log(string.format("TacCamHighlight: %s - %d\n", colors[tacCamColor], tacCamColor), "ToJsonTacCamHighlight")
     return colors[tacCamColor]
 end
 
@@ -199,9 +206,9 @@ local function DumpDataTable()
         if success then
             file:write(encodedJson)
             file:close()
-            print(string.format("[TFWWorkbench:%s] Successfully wrote JSON file", tableName))
+            Log("Successfully wrote JSON file", "DumpDataTable")
         else
-            print(string.format("[TFWWorkbench:%s] Failed to encode JSON: %s", tableName, tostring(encodedJson)))
+            Log(string.format("Failed to encode JSON: %s", tostring(encodedJson)), "DumpDataTable")
             file:close()
         end
     end
