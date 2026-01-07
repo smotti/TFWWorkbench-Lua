@@ -3,9 +3,12 @@ local Utils = require("utils")
 local Settings = require("Settings")
 local ItemDetailsDataHandler = require("ItemDetailsData")
 local Items = require("Items")
+local ItemTagsHandler = require("ItemTags")
 
 ---@class UDataTable
 local ItemDetailsData
+---@class UDataTable
+local ItemTags
 
 --[[
 Read all files of the mods `Items` directory. Collect all items
@@ -68,13 +71,15 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
 
     outputDevice:Log("Dumping data tables")
 
-    ItemDetailsData = StaticFindObject(Settings.DataTableClassNames.ItemDetailsData)
     if ItemDetailsData and ItemDetailsData:IsValid() then
         ItemDetailsDataHandler.DumpDataTable()
-        return true
     end
 
-    return false
+    if ItemTags and ItemTags:IsValid() then
+        ItemTagsHandler.DumpDataTable()
+    end
+
+    return true
 end)
 
 ExecuteInGameThread(function()
@@ -83,5 +88,10 @@ ExecuteInGameThread(function()
         ItemDetailsDataHandler.Init(ItemDetailsData)
         local itemCollection = CollectItems()
         Items.AddItems(itemCollection.Add, ItemDetailsDataHandler)
+    end
+
+    ItemTags = StaticFindObject(Settings.DataTableClassNames.ItemTags)
+    if ItemTags and ItemTags:IsValid() then
+        ItemTagsHandler.Init(ItemTags)
     end
 end)
