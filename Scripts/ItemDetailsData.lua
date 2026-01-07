@@ -134,11 +134,6 @@ end
 local function DumpDataTable()
     ---@class UDataTable
     local dataTable = DataTable.__table
-    local tableName = DataTable.__name
-
-    -- Get KismetSystemLibrary for type conversions
-    local kismetLib = UEHelpers.GetKismetSystemLibrary()
-
     local output = {}
     local file = io.open(DataTable.__dumpFile, "w")
 
@@ -159,8 +154,8 @@ local function DumpDataTable()
             file:close()
             Log("Successfully wrote JSON file", "DumpDataTable")
         else
-            Log(string.format("Failed to encode JSON: %s", tostring(encodedJson)), "DumpDataTable")
             file:close()
+            Log(string.format("Failed to encode JSON: %s", tostring(encodedJson)), "DumpDataTable")
         end
     end
 end
