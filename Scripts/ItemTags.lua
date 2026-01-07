@@ -7,7 +7,7 @@ local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 
 local function Log(message, funcName)
-    Utils.Log(message, "ItemDetailsData", funcName)
+    Utils.Log(message, "ItemTags", funcName)
 end
 
 local DataTable = {}
@@ -64,7 +64,9 @@ local function DumpDataTable()
     end
 end
 
-local function AddRow(name, data)
+local function AddRow(itemTag)
+    Log(string.format("Adding row %s\n", itemTag), "AddRow")
+    DataTable.__table:AddRow(itemTag, { Tag = FName(itemTag, EFindName.FNAME_Add), DevComment = "" })
 end
 
 DataTable.Init = Init

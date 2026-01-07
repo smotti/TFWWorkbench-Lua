@@ -65,6 +65,10 @@ local function CollectItems()
     return itemCollection
 end
 
+local function IsDataTableValid(dataTable)
+    return dataTable and dataTable:IsValid()
+end
+
 RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, outputDevice)
     Utils.Log("Handle console command 'DumpDataTables'\n", "main")
     Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
@@ -84,14 +88,17 @@ end)
 
 ExecuteInGameThread(function()
     ItemDetailsData = StaticFindObject(Settings.DataTableClassNames.ItemDetailsData)
-    if ItemDetailsData and ItemDetailsData:IsValid() then
+    if IsDataTableValid(ItemDetailsData) then
         ItemDetailsDataHandler.Init(ItemDetailsData)
-        local itemCollection = CollectItems()
-        Items.AddItems(itemCollection.Add, ItemDetailsDataHandler)
     end
 
     ItemTags = StaticFindObject(Settings.DataTableClassNames.ItemTags)
-    if ItemTags and ItemTags:IsValid() then
+    if IsDataTableValid(ItemTags) then
         ItemTagsHandler.Init(ItemTags)
+    end
+
+    if IsDataTableValid(ItemDetailsData) and IsDataTableValid(ItemTags) then
+        local itemCollection = CollectItems()
+        Items.AddItems(itemCollection.Add, ItemDetailsDataHandler, ItemTagsHandler)
     end
 end)
