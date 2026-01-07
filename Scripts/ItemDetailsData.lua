@@ -6,6 +6,24 @@ local Settings = require("Settings")
 
 local DataTable = {}
 
+local EItemCategory = {
+    Loot = 0,
+    Weapon = 1,
+    Ammo = 2,
+    MedicalSupplies = 3,
+    General = 4,
+    Dangle = 5,
+    EItemCategory_MAX = 6,
+}
+
+local TacCamColours = {
+    Default = 0,
+    Green = 1,
+    Red = 2,
+    Yellow = 3,
+    TacCamColours_MAX = 4
+}
+
 local function Log(message, funcName)
     Utils.Log(message, "ItemDetailsData", funcName)
 end
@@ -14,7 +32,8 @@ local function Init(dataTable)
     DataTable.__table = dataTable
     DataTable.__name = "ItemDetailsData"
     DataTable.__kismetlib = UEHelpers.GetKismetSystemLibrary()
-    
+    DataTable.__kismetText = UEHelpers.GetKismetTextLibrary()
+
     local dirs = IterateGameDirectories()
     local modDirs = dirs.Game.Content.Paks.Mods.TFWWorkbench
     if not modDirs then
@@ -137,6 +156,7 @@ local function DumpDataTable()
 
     local item = dataTable:FindRow("FirstAid")
     output["FirstAid"] = ParseFInventorItemDetails(item)
+    output["TestItem"] = ParseFInventorItemDetails(dataTable:FindRow("TestItem"))
 --    dataTable:ForEachRow(function(rowName, rowData)
 --        ---@cast rowName string
 --        ---@cast rowData FInventoryItemDetails
@@ -157,9 +177,44 @@ local function DumpDataTable()
     end
 end
 
+local function AddRow(name, data)
+    Log(string.format("Adding row %s\n", name), "AddRow")
+
+    ---@class FInventoryDetails
+    local testData = {
+        Category = data["Category"],
+        ItemMesh = data["ItemMesh"],
+        ItemMeshTransform = data["ItemMeshTransform"],
+        ItemLootRadius = data["ItemLootRadius"],
+        ItemIconRadius = data["ItemIconRadius"],
+        ItemIcon = data["ItemIcon"],
+        ItemType = EItemCategory[data["ItemType"]],
+        ItemSubtype = data["ItemSubtype"],
+        LootSound = data["LootSound"],
+        DropSound = data["DropSound"],
+        ItemSize = data["ItemSize"],
+        Volume = data["Volume"],
+        Weight = data["Weight"],
+        ValueRow = data["ValueRow"],
+        DropOnDeath = data["DropOnDeath"],
+        MaxStack = data["MaxStack"],
+        ExtraTagData = data["ExtraTagData"],
+        StartingStack = data["StartingStack"],
+        ConsumableAbility = data["ConsumableAbility"],
+        BattlepointsRowHandle = data["BattlepointsRowHandle"],
+        TacCamHighlight = TacCamColours[data["TacCamHighlight"]],
+        RareLootCategory = data["RareLootCategory"],
+        RareLootLocations = data["RareLootLocations"]
+    }
+
+    -- Need to use custom function that's implemented in the C++ part of this mod.
+    AddInventoryItemRow(name, testData)
+end
+
 -- Export module functions
 --DataTable.convertFInventoryItemDetails = convertFInventoryItemDetails
 DataTable.Init = Init
 DataTable.DumpDataTable = DumpDataTable
+DataTable.AddRow = AddRow
 
 return DataTable
