@@ -1,5 +1,5 @@
 --[[
-A module to manage rows in the `DT_ItemTags` data table
+A module to manage rows in the `DT_TagToRowHandle` data table
 ]]
 local DataTableParser = require("DataTableParser")
 local json = require("json")
@@ -7,14 +7,14 @@ local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 
 local function Log(message, funcName)
-    Utils.Log(message, "ItemTags", funcName)
+    Utils.Log(message, "TagToRowHandle", funcName)
 end
 
 local DataTable = {}
 
 local function Init(dataTable)
     DataTable.__table = dataTable
-    DataTable.__name = "ItemTags"
+    DataTable.__name = "TagToRowHandle"
     DataTable.__kismetlib = UEHelpers.GetKismetSystemLibrary()
     DataTable.__kismetText = UEHelpers.GetKismetTextLibrary()
 
@@ -23,19 +23,45 @@ local function Init(dataTable)
     if not modDirs then
         Utils.Log("No such directory Contents/Paks/TFWWorkbench", "Init")
     else
-        DataTable.__dumpFile = string.format("%s/Dumps/DT_ItemTags.json", modDirs.__absolute_path)
+        DataTable.__dumpFile = string.format("%s/Dumps/DT_TagToRowHandle.json", modDirs.__absolute_path)
         Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "Init")
     end
 end
 
----Parse FGameplayTagTableRow to table that can be json encoded.
----@param data FGameplayTagTableRow
+local EStoreCategory = {
+    Item = 0,
+    QuestItem = 1,
+    Weapon = 2,
+    Container = 3,
+    Rig = 4,
+    Dangly = 5,
+    Frame = 6,
+    Buddy = 7
+}
+
+local function ToJsonEStoreCategory(storeCategory)
+    local categories = {
+        [0] = "Item",
+        [1] = "QuestItem",
+        [2] = "Weapon",
+        [3] = "Container",
+        [4] = "Rig",
+        [5] = "Dangly",
+        [6] = "Frame",
+        [7] = "Buddy"
+    }
+    Log(string.format("EStoreCategroy: %s - %d\n", categories[storeCategory], storeCategory), "ToJsonEStoreCategory")
+    return categories[storeCategory]
+end
+
+---Parse FWItemType to table that can be json encoded.
+---@param data FFWItemType
 ---@return table
-local function ParseFGameplayTagTableRow(data)
+local function ParseFWItemType(data)
     local kismetLib = DataTable.__kismetlib
     return {
-        Tag = DataTableParser.ToJson(data.Tag, kismetLib),
-        DevComment = DataTableParser.ToJson(data.DevComment, kismetLib)
+        DataRow = DataTableParser.ToJson(data.DataRow, kismetLib),
+        DataType = ToJsonEStoreCategory(data.DataType)
     }
 end
 
@@ -47,8 +73,8 @@ local function DumpDataTable()
 
     dataTable:ForEachRow(function(rowName, rowData)
         ---@cast rowName string
-        ---@cast rowData FGameplayTagTableRow
-        output[rowName] = ParseFGameplayTagTableRow(rowData)
+        ---@cast rowData FFWItemType
+        output[rowName] = ParseFWItemType(rowData)
     end)
 
     if file then
@@ -64,9 +90,16 @@ local function DumpDataTable()
     end
 end
 
-local function AddRow(itemTag)
+local function AddRow(itemTag, data)
+    local fwItemType = {
+        DataType = EStoreCategory[data["DataType"]],
+        DataRow = {
+            RowName = FName(data["Name"], EFindName.FNAME_Add),
+            DataTable = StaticFindObject(data["DataTable"])
+        }
+    }
+    DataTable.__table:AddRow(itemTag, fwItemType)
     Log(string.format("Adding row %s\n", itemTag), "AddRow")
-    DataTable.__table:AddRow(itemTag, { Tag = FName(itemTag, EFindName.FNAME_Add), DevComment = "" })
 end
 
 DataTable.Init = Init

@@ -4,11 +4,14 @@ local Settings = require("Settings")
 local ItemDetailsDataHandler = require("ItemDetailsData")
 local Items = require("Items")
 local ItemTagsHandler = require("ItemTags")
+local TagToRowHandleHandler = require("TagToRowHandle")
 
 ---@class UDataTable
 local ItemDetailsData
 ---@class UDataTable
 local ItemTags
+---@class UDataTable
+local TagToRowHandle
 
 --[[
 Read all files of the mods `Items` directory. Collect all items
@@ -75,12 +78,16 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
 
     outputDevice:Log("Dumping data tables")
 
-    if ItemDetailsData and ItemDetailsData:IsValid() then
+    if IsDataTableValid(ItemDetailsData) then
         ItemDetailsDataHandler.DumpDataTable()
     end
 
-    if ItemTags and ItemTags:IsValid() then
+    if IsDataTableValid(ItemTags) then
         ItemTagsHandler.DumpDataTable()
+    end
+
+    if IsDataTableValid(TagToRowHandle) then
+        TagToRowHandleHandler.DumpDataTable()
     end
 
     return true
@@ -97,8 +104,13 @@ ExecuteInGameThread(function()
         ItemTagsHandler.Init(ItemTags)
     end
 
+    TagToRowHandle = StaticFindObject(Settings.DataTableClassNames.TagToRowHandle)
+    if IsDataTableValid(TagToRowHandle) then
+        TagToRowHandleHandler.Init(TagToRowHandle)
+    end
+
     if IsDataTableValid(ItemDetailsData) and IsDataTableValid(ItemTags) then
         local itemCollection = CollectItems()
-        Items.AddItems(itemCollection.Add, ItemDetailsDataHandler, ItemTagsHandler)
+        Items.AddItems(itemCollection.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
     end
 end)
