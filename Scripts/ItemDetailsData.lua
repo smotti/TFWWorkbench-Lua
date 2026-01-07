@@ -4,6 +4,7 @@ local Utils = require("utils")
 local DataTableParser = require("DataTableParser")
 local Settings = require("Settings")
 
+
 local DataTable = {}
 
 local EItemCategory = {
@@ -44,19 +45,6 @@ local function Init(dataTable)
     end
 end
 
-local function PrintTable(o)
-   if type(o) == 'table' then
-      local s = '{ '
-      for k,v in pairs(o) do
-         if type(k) ~= 'number' then k = '"'..k..'"' end
-         s = s .. '['..k..'] = ' .. PrintTable(v) .. ','
-      end
-      return s .. '} '
-   else
-      return tostring(o)
-   end
-end
-
 local function ToJsonItemMeshTransform(itemMeshTransform)
     local result = {
         Rotation = {},
@@ -71,9 +59,9 @@ local function ToJsonItemMeshTransform(itemMeshTransform)
         end)
     end
 
-    Log(string.format("Rotation: %s\n", PrintTable(result.Rotation)), "ToJsonItemMeshTransform")
-    Log(string.format("Translation: %s\n", PrintTable(result.Translation)), "ToJsonItemMeshTransform")
-    Log(string.format("Scale3D: %s\n", PrintTable(result.Scale3D)), "ToJsonItemMeshTransform")
+    Log(string.format("Rotation: %s\n", Utils.PrintTable(result.Rotation)), "ToJsonItemMeshTransform")
+    Log(string.format("Translation: %s\n", Utils.PrintTable(result.Translation)), "ToJsonItemMeshTransform")
+    Log(string.format("Scale3D: %s\n", Utils.PrintTable(result.Scale3D)), "ToJsonItemMeshTransform")
 
     return result
 end
