@@ -13,6 +13,9 @@ local ItemTags
 ---@class UDataTable
 local TagToRowHandle
 
+--TODO Write a function that checks if the mod's directory exists.
+--If not it should be created.
+
 --[[
 Read all files of the mods `Items` directory. Collect all items
 in a table with the keys being the action (`Add`, `Modify`, `Remove`)
@@ -77,7 +80,8 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
     Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
 
     outputDevice:Log("Dumping data tables")
-
+    --NOTE: This should probably be called async because right now dumping large tables can lock up the game
+    -- while doing so.
     if IsDataTableValid(ItemDetailsData) then
         ItemDetailsDataHandler.DumpDataTable()
     end
@@ -88,6 +92,57 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
 
     if IsDataTableValid(TagToRowHandle) then
         TagToRowHandleHandler.DumpDataTable()
+    end
+
+    return true
+end)
+
+RegisterConsoleCommandHandler("TestItemTagsHandler", function(fullCmd, params, outputDevice)
+    Utils.Log("Handle console command 'TestItemTagsHandler'\n", "main")
+    Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
+
+    outputDevice:Log("Test RemoveRow\n")
+    local itemTag = "Inventory.Item.TestItem"
+    ItemTagsHandler.RemoveRow(itemTag)
+    local row = ItemTagsHandler.__table:FindRow(itemTag)
+    if not row then
+        outputDevice:Log("[x] Test RemoveRow\n")
+    else
+        outputDevice:Log("[-] Test RemoveRow\n")
+    end
+
+    return true
+end)
+
+RegisterConsoleCommandHandler("TestTagToRowHandleHandler", function(fullCmd, params, outputDevice)
+    Utils.Log("Handle console command 'TestTagToRowHandleandler'\n", "main")
+    Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
+
+    outputDevice:Log("Test RemoveRow\n")
+    local itemTag = "Inventory.Item.TestItem"
+    TagToRowHandleHandler.RemoveRow(itemTag)
+    local row = TagToRowHandleHandler.__table:FindRow(itemTag)
+    if not row then
+        outputDevice:Log("[x] Test RemoveRow\n")
+    else
+        outputDevice:Log("[-] Test RemoveRow\n")
+    end
+
+    return true
+end)
+
+RegisterConsoleCommandHandler("TestItemDetailsDataHandler", function(fullCmd, params, outputDevice)
+    Utils.Log("Handle console command 'TestItemDetailsDataHandler'\n", "main")
+    Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
+
+    outputDevice:Log("Test RemoveRow\n")
+    local itemId = "TestItem"
+    ItemDetailsDataHandler.RemoveRow(itemId)
+    local row = ItemDetailsDataHandler.__table:FindRow(itemId)
+    if not row then
+        outputDevice:Log("[x] Test RemoveRow\n")
+    else
+        outputDevice:Log("[-] Test RemoveRow\n")
     end
 
     return true

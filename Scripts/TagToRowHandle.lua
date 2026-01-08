@@ -102,8 +102,14 @@ local function AddRow(itemTag, data)
     Log(string.format("Adding row %s\n", itemTag), "AddRow")
 end
 
+local function RemoveRow(itemTag)
+    DataTable.__table:RemoveRow(itemTag)
+    Log(string.format("Removing row %s\n", itemTag))
+end
+
 DataTable.Init = Init
 DataTable.AddRow = AddRow
 DataTable.DumpDataTable = DumpDataTable
+DataTable.RemoveRow = RemoveRow
 
 return DataTable

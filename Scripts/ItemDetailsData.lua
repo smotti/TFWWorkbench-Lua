@@ -194,10 +194,18 @@ local function AddRow(name, data)
     AddInventoryItemRow(name, testData)
 end
 
+--TODO: This might not be save. Even though the item seems to be removed.
+--A subsequent DumpDataTable throws an error at the second item in the table.
+--Claiming `data` is nil at line 100.
+local function RemoveRow(itemId)
+    DataTable.__table:RemoveRow(itemId)
+    Log(string.format("Removing row %s\n", itemId), "RemoveRow")
+end
+
 -- Export module functions
---DataTable.convertFInventoryItemDetails = convertFInventoryItemDetails
 DataTable.Init = Init
 DataTable.DumpDataTable = DumpDataTable
 DataTable.AddRow = AddRow
+DataTable.RemoveRow = RemoveRow
 
 return DataTable

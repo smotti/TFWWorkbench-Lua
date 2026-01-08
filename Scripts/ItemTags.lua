@@ -69,8 +69,14 @@ local function AddRow(itemTag)
     DataTable.__table:AddRow(itemTag, { Tag = FName(itemTag, EFindName.FNAME_Add), DevComment = "" })
 end
 
+local function RemoveRow(itemTag)
+    Log(string.format("Removing row %s\n", itemTag), "RemoveRow")
+    DataTable.__table:RemoveRow(itemTag)
+end
+
 DataTable.Init = Init
 DataTable.AddRow = AddRow
 DataTable.DumpDataTable = DumpDataTable
+DataTable.RemoveRow = RemoveRow
 
 return DataTable
