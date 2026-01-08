@@ -69,6 +69,15 @@ local function AddRow(itemTag)
     DataTable.__table:AddRow(itemTag, { Tag = FName(itemTag, EFindName.FNAME_Add), DevComment = "" })
 end
 
+--NOTE: Not sure if we should really have that. I guess it could come in handy eventually. To redirect
+--the game to another item instead of the original.
+local function ModifyRow(itemTag, tagData)
+    Log(string.format("Modifying row %s - %s\n", itemTag, Utils.PrintTable(tagData)), "ModifyRow")
+    DataTable.__table:AddRow(
+        itemTag,
+        { Tag = FName(tagData.Tag, EFindName.FNAME_Add), DevComment = tagData.DevComment })
+end
+
 local function RemoveRow(itemTag)
     Log(string.format("Removing row %s\n", itemTag), "RemoveRow")
     DataTable.__table:RemoveRow(itemTag)
@@ -77,6 +86,7 @@ end
 DataTable.Init = Init
 DataTable.AddRow = AddRow
 DataTable.DumpDataTable = DumpDataTable
+DataTable.ModifyRow = ModifyRow
 DataTable.RemoveRow = RemoveRow
 
 return DataTable

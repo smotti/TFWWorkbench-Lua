@@ -161,10 +161,8 @@ local function DumpDataTable()
 end
 
 local function AddRow(name, data)
-    Log(string.format("Adding row %s\n", name), "AddRow")
-
-    ---@class FInventoryDetails
-    local testData = {
+    ---@class FInventoryItemDetails
+    local rowData = {
         Category = data["Category"],
         ItemMesh = data["ItemMesh"],
         ItemMeshTransform = data["ItemMeshTransform"],
@@ -191,7 +189,31 @@ local function AddRow(name, data)
     }
 
     -- Need to use custom function that's implemented in the C++ part of this mod.
-    AddInventoryItemRow(name, testData)
+    AddInventoryItemRow(name, rowData)
+
+    Log(string.format("Adding row %s\n", name), "AddRow")
+end
+
+local function ModifyRow(name, data)
+    local row = DataTable.__table:FindRow(name)
+    if not row then
+        Log(string.format("Row with name %s not found\n", name), "ModifyRow")
+        return
+    end
+
+    local parsedRow = ParseFInventorItemDetails(row)
+    for field, value in pairs(data) do
+        if field == "ItemType" then
+            parsedRow[field] = EItemCategory[value]
+        elseif field == "TacCamHighlight" then
+            parsedRow[field] = TacCamColours[value]
+        else
+            parsedRow[field] = value
+        end
+    end
+
+    Log(string.format("Modifying row %s by calling AddRow\n", name), "ModifyRow")
+    AddRow(name, parsedRow)
 end
 
 --TODO: This might not be save. Even though the item seems to be removed.
@@ -206,6 +228,7 @@ end
 DataTable.Init = Init
 DataTable.DumpDataTable = DumpDataTable
 DataTable.AddRow = AddRow
+DataTable.ModifyRow = ModifyRow
 DataTable.RemoveRow = RemoveRow
 
 return DataTable

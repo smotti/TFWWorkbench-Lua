@@ -1,6 +1,8 @@
 local json = require("json")
+local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 local Settings = require("Settings")
+local Parser = require("DataTableParser")
 local ItemDetailsDataHandler = require("ItemDetailsData")
 local Items = require("Items")
 local ItemTagsHandler = require("ItemTags")
@@ -97,12 +99,30 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
     return true
 end)
 
+--TODO: Move these tests into the respective table modules. During the init phase of the mod we have to
+--call a function to register the console command handlers.
 RegisterConsoleCommandHandler("TestItemTagsHandler", function(fullCmd, params, outputDevice)
     Utils.Log("Handle console command 'TestItemTagsHandler'\n", "main")
     Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
 
-    outputDevice:Log("Test RemoveRow\n")
     local itemTag = "Inventory.Item.TestItem"
+    local testData = {
+        Tag = "Test",
+        DevComment = "Test"
+    }
+
+    ItemTagsHandler.ModifyRow(itemTag, testData)
+    local row = ItemTagsHandler.__table:FindRow(itemTag)
+    if not row then
+        if row.Tag == testData.Tag and row.DevComment == testData.DevComment then
+         outputDevice:Log("[x] Test ModifyRow\n")
+        else
+            outputDevice:Log("[-] Test ModifyRow\n")
+        end
+    else
+        outputDevice:Log("[-] Test ModifyRow\n")
+    end
+
     ItemTagsHandler.RemoveRow(itemTag)
     local row = ItemTagsHandler.__table:FindRow(itemTag)
     if not row then
@@ -115,13 +135,43 @@ RegisterConsoleCommandHandler("TestItemTagsHandler", function(fullCmd, params, o
 end)
 
 RegisterConsoleCommandHandler("TestTagToRowHandleHandler", function(fullCmd, params, outputDevice)
-    Utils.Log("Handle console command 'TestTagToRowHandleandler'\n", "main")
+    Utils.Log("Handle console command 'TestTagToRowHandleHandler'\n", "main")
     Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
 
-    outputDevice:Log("Test RemoveRow\n")
+    local lib = UEHelpers.GetKismetSystemLibrary()
     local itemTag = "Inventory.Item.TestItem"
-    TagToRowHandleHandler.RemoveRow(itemTag)
+    local testData = {
+        DataType = "Weapon",
+        DataRow = {
+            RowName = "Test",
+            DataTable = Settings.DataTableClassNames.ItemTags
+        }
+    }
+
+    TagToRowHandleHandler.ModifyRow(itemTag, testData)
     local row = TagToRowHandleHandler.__table:FindRow(itemTag)
+    if row then
+        Utils.Log(
+            string.format(
+                "ROW: %d - %s - %s\n",
+                Parser.ToJson(row.DataType),
+                Parser.ToJson(row.DataRow.RowName),
+                string.match(row.DataRow.DataTable:GetFullName(), "^DataTable%s+(.*)")),
+            "main", "TestTagToRowHandleHandler")
+        if row.DataType == 2
+            and Parser.ToJson(row.DataRow.RowName, lib) == testData.DataRow.RowName
+            and string.match(row.DataRow.DataTable:GetFullName(), "^DataTable%s+(.*)") == testData.DataRow.DataTable then
+
+            outputDevice:Log("[x] Test ModifyRow\n")
+        else
+            outputDevice:Log("[-] Test ModifyRow\n")
+        end
+    else
+        outputDevice:Log("[-] Test ModifyRow\n")
+    end
+
+    TagToRowHandleHandler.RemoveRow(itemTag)
+    row = TagToRowHandleHandler.__table:FindRow(itemTag)
     if not row then
         outputDevice:Log("[x] Test RemoveRow\n")
     else
@@ -135,8 +185,23 @@ RegisterConsoleCommandHandler("TestItemDetailsDataHandler", function(fullCmd, pa
     Utils.Log("Handle console command 'TestItemDetailsDataHandler'\n", "main")
     Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
 
-    outputDevice:Log("Test RemoveRow\n")
     local itemId = "TestItem"
+    local testData = {
+        Category = "Test"
+    }
+
+    ItemDetailsDataHandler.ModifyRow(itemId, testData)
+    local row = ItemDetailsDataHandler.__table:FindRow(itemId)
+    if row then
+        if row.Category:ToString() == testData.Category then
+            outputDevice:Log("[x] Test ModifyRow\n")
+        else
+            outputDevice:Log("[-] Test ModifyRow\n")
+        end
+    else
+        outputDevice:Log("[-] Test ModifyRow\n")
+    end
+
     ItemDetailsDataHandler.RemoveRow(itemId)
     local row = ItemDetailsDataHandler.__table:FindRow(itemId)
     if not row then
@@ -167,5 +232,8 @@ ExecuteInGameThread(function()
     if IsDataTableValid(ItemDetailsData) and IsDataTableValid(ItemTags) then
         local itemCollection = CollectItems()
         Items.AddItems(itemCollection.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+        for _, itemData in ipairs(itemCollection.Modify) do
+            ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
+        end
     end
 end)

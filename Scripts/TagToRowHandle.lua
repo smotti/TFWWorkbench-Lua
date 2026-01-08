@@ -102,14 +102,27 @@ local function AddRow(itemTag, data)
     Log(string.format("Adding row %s\n", itemTag), "AddRow")
 end
 
+local function ModifyRow(itemTag, data)
+    local fwItemType = {
+        DataType = EStoreCategory[data["DataType"]],
+        DataRow = {
+            RowName = FName(data["DataRow"]["RowName"], EFindName.FNAME_Add),
+            DataTable = StaticFindObject(data["DataRow"]["DataTable"])
+        }
+    }
+    DataTable.__table:AddRow(itemTag, fwItemType)
+    Log(string.format("Modifying row %s - %s\n", itemTag, Utils.PrintTable(data)), "ModifyRow")
+end
+
 local function RemoveRow(itemTag)
     DataTable.__table:RemoveRow(itemTag)
-    Log(string.format("Removing row %s\n", itemTag))
+    Log(string.format("Removing row %s\n", itemTag), "RemoveRow")
 end
 
 DataTable.Init = Init
 DataTable.AddRow = AddRow
 DataTable.DumpDataTable = DumpDataTable
+DataTable.ModifyRow = ModifyRow
 DataTable.RemoveRow = RemoveRow
 
 return DataTable
