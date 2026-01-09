@@ -1,3 +1,19 @@
+local function GetDataTableName(dataTable)
+    if not (type(dataTable) == "string") then
+        return string.match(
+            string.match(dataTable:GetFullName(), "^DataTable%s+(.*)"),
+            "%.(.+)$")
+    else
+        -- Handling the case where dataTable is a string path without the "DataTable" prefix
+        local path = string.match(dataTable, "^DataTable%s+(.*)")
+        if not path then
+            return string.match(dataTable, "%.(.+)$")
+        else
+            return string.match(path, "%.(.+)$")
+        end
+    end
+end
+
 -- Parameter order
 -- message
 -- component
