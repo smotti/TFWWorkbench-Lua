@@ -1,12 +1,11 @@
 local json = require("json")
-local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 local Settings = require("Settings")
-local Parser = require("DataTableParser")
 local ItemDetailsDataHandler = require("ItemDetailsData")
 local Items = require("Items")
 local ItemTagsHandler = require("ItemTags")
 local TagToRowHandleHandler = require("TagToRowHandle")
+local ValueHandler = require("Value")
 
 ---@class UDataTable
 local ItemDetailsData
@@ -15,8 +14,7 @@ local ItemTags
 ---@class UDataTable
 local TagToRowHandle
 
---TODO Write a function that checks if the mod's directory exists.
---If not it should be created.
+local ValueHandlers = {}
 
 local function FindOrCreateModDir()
     local dirs = IterateGameDirectories()
@@ -110,6 +108,12 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
         ExecuteAsync(function() TagToRowHandleHandler.DumpDataTable() end)
     end
 
+    for _, handler in pairs(ValueHandlers) do
+        if IsDataTableValid(handler.__table) then
+            ExecuteAsync(function() handler:DumpDataTable() end)
+        end
+    end
+
     return true
 end)
 
@@ -137,6 +141,14 @@ ExecuteInGameThread(function()
         TagToRowHandleHandler.Init(TagToRowHandle)
     end
 
+    for _, path in ipairs(Settings.ValueTables) do
+        local dataTable = StaticFindObject(path)
+        if dataTable and dataTable:IsValid() then
+            local dataTableName = Utils.GetDataTableName(dataTable)
+            ValueHandlers[dataTableName] = ValueHandler.new(dataTable)
+        end
+    end
+
     -- NOTE: These Add/Modify/Remove function calls could potentially also be called asynchronously
     -- if there are ever any "performance" concerns. Though it's more a user experience thing.
     -- As a large amount of items could cause the game thread to be locked up. Meaning the game would
@@ -150,5 +162,14 @@ ExecuteInGameThread(function()
 
         Items.RemoveItems(dataCollections.Item.Remove, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
     end
+
+    -- NOTE: Not sure if this is the right place to do here. As it requires knowledge about the datas shape.
+    -- Which should probably be encapsulated in the corresponding module.
+    for _, element in ipairs(dataCollections.ItemValue.Add) do
+        local dataTableName = Utils.GetDataTableName(element["Data"]["DataTable"])
+        if dataTableName then
+            local handler = ValueHandlers[dataTableName]
+            handler:AddRow(element["Name"], element["Data"])
+        end
     end
 end)
