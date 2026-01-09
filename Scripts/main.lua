@@ -6,6 +6,16 @@ local Items = require("Items")
 local ItemTagsHandler = require("ItemTags")
 local TagToRowHandleHandler = require("TagToRowHandle")
 local ValueHandler = require("Value")
+local ManufacturingRecipes = require("ManufacturingRecipes")
+
+
+-- NOTE Required to parse RecipyCraftTime of ManufactoringRecipies
+RegisterCustomProperty({
+    ["Name"] = "RecipyCraftTime",
+    ["Type"] = PropertyTypes.Int64Property,
+    ["BelongsToClass"] = "/Script/FWHubWorld.ManufactoringRecipies",
+    ["OffsetInternal"] = 0x68
+})
 
 ---@class UDataTable
 local ItemDetailsData
@@ -14,6 +24,7 @@ local ItemTags
 ---@class UDataTable
 local TagToRowHandle
 
+local ManufacturingRecipesHandler = {}
 local ValueHandlers = {}
 
 local function FindOrCreateModDir()
@@ -114,6 +125,10 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
         end
     end
 
+    if IsDataTableValid(ManufacturingRecipesHandler.__table) then
+        ExecuteAsync(function() ManufacturingRecipesHandler:DumpDataTable() end)
+    end
+
     return true
 end)
 
@@ -139,6 +154,11 @@ ExecuteInGameThread(function()
     TagToRowHandle = StaticFindObject(Settings.DataTableClassNames.TagToRowHandle)
     if IsDataTableValid(TagToRowHandle) then
         TagToRowHandleHandler.Init(TagToRowHandle)
+    end
+
+    local dataTable = StaticFindObject(Settings.DataTableClassNames.ManufacturingRecipes)
+    if IsDataTableValid(dataTable) then
+        ManufacturingRecipesHandler = ManufacturingRecipes.new(dataTable)
     end
 
     for _, path in ipairs(Settings.ValueTables) do
