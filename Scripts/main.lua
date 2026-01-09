@@ -82,18 +82,17 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
     Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
 
     outputDevice:Log("Dumping data tables")
-    --NOTE: This should probably be called async because right now dumping large tables can lock up the game
-    -- while doing so.
+    --NOTE: Using async calls here to don't lock up the game thread
     if IsDataTableValid(ItemDetailsData) then
-        ItemDetailsDataHandler.DumpDataTable()
+        ExecuteAsync(function() ItemDetailsDataHandler.DumpDataTable() end)
     end
 
     if IsDataTableValid(ItemTags) then
-        ItemTagsHandler.DumpDataTable()
+        ExecuteAsync(function() ItemTagsHandler.DumpDataTable() end)
     end
 
     if IsDataTableValid(TagToRowHandle) then
-        TagToRowHandleHandler.DumpDataTable()
+        ExecuteAsync(function() TagToRowHandleHandler.DumpDataTable() end)
     end
 
     return true
@@ -115,6 +114,10 @@ ExecuteInGameThread(function()
         TagToRowHandleHandler.Init(TagToRowHandle)
     end
 
+    -- NOTE: These Add/Modify/Remove function calls could potentially also be called asynchronously
+    -- if there are ever any "performance" concerns. Though it's more a user experience thing.
+    -- As a large amount of items could cause the game thread to be locked up. Meaning the game would
+    -- take a bit longer to load into the main menu.
     if IsDataTableValid(ItemDetailsData) and IsDataTableValid(ItemTags) then
         local itemCollection = CollectItems()
 
