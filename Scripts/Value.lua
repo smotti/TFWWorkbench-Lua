@@ -4,9 +4,9 @@ instances of a "handler". For each individual value data table.
 It's probably better to refactor all the other data table modules to follow
 the abstraction that this modules implements.
 ]]
+local DataTable = require("DataTable")
 local json = require("json")
 local Parser = require("DataTableParser")
-local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 
 
@@ -14,34 +14,17 @@ local function Log(message, funcName)
     Utils.Log(message, "Value", funcName)
 end
 
-local DataTable = {
-    __table = nil,
-    __name = "",
-    __dumpFile = "",
-    __kismetlib = nil
-}
-DataTable.__index = DataTable
+local Value = setmetatable({}, {__index = DataTable})
+Value.__index = Value
 
-function DataTable.new(dataTable)
-    local self = setmetatable({}, DataTable)
-    self.__table = dataTable
-    self.__name = Utils.GetDataTableName(dataTable)
-    self.__kismetlib = UEHelpers.GetKismetSystemLibrary()
-
-    local dirs = IterateGameDirectories()
-    local modDirs = dirs.Game.Content.Paks.Mods.TFWWorkbench
-    if not modDirs then
-        Log("No such directory Contents/Paks/TFWWorkbench", "new")
-    else
-        self.__dumpFile = string.format("%s/Dumps/%s.json", modDirs.__absolute_path, self.__name)
-        Log(string.format("DumpFile: %s\n", self.__dumpFile), "new")
-    end
-
+function Value.new(dataTable)
+    local self = DataTable.new(dataTable)
+    setmetatable(self, Value)
     return self
 end
 
 ---@param data FValueOverride
-function DataTable:ParseFValueOverride(data)
+function Value:ParseRowData(data)
     local lib = self.__kismetlib
     return {
         ValueType = Parser.ToJson(data.ValueType, lib),
@@ -50,7 +33,7 @@ function DataTable:ParseFValueOverride(data)
     }
 end
 
-function DataTable:ToFValueOverride(data)
+function Value:ToFValueOverride(data)
     return {
         ValueType = data["ValueType"],
         Value = data["Value"],
@@ -58,14 +41,14 @@ function DataTable:ToFValueOverride(data)
     }
 end
 
-function DataTable:DumpDataTable()
+function Value:DumpDataTable()
     ---@class UDataTable
     local dataTable = self.__table
     local output = {}
     local file = io.open(self.__dumpFile, "w")
 
     dataTable:ForEachRow(function(rowName, rowData)
-        output[rowName] = self:ParseFValueOverride(rowData)
+        output[rowName] = self:ParseRowData(rowData)
     end)
 
     if file then
@@ -81,20 +64,20 @@ function DataTable:DumpDataTable()
     end
 end
 
-function DataTable:AddRow(name, data)
+function Value:AddRow(name, data)
     self.__table:AddRow(name, self:ToFValueOverride(data))
 
     Log(string.format("Adding row %s\n", name), "AddRow")
 end
 
-function DataTable:ModifyRow(name, data)
+function Value:ModifyRow(name, data)
     local oldData = self.__table:FindRow(name)
     if not oldData then
         Log(string.format("Failed to find item %s\n", name), "ModifyRow")
         return
     end
 
-    local newData = self:ParseFValueOverride(oldData)
+    local newData = self:ParseRowData(oldData)
     for k, v in pairs(data) do
         newData[k] = v
     end
@@ -103,9 +86,9 @@ function DataTable:ModifyRow(name, data)
     Log(string.format("Modifying row %s\n", name), "ModifyRow")
 end
 
-function DataTable:RemoveRow(name)
+function Value:RemoveRow(name)
     self.__table:RemoveRow(name)
     Log(string.format("Removing row %s\n", name), "RemoveRow")
 end
 
-return DataTable
+return Value
