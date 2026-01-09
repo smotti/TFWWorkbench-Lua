@@ -12,6 +12,53 @@ end
 
 local DataTable = {}
 
+local function RegisterTests()
+    RegisterConsoleCommandHandler("TestTagToRowHandleHandler", function(fullCmd, params, outputDevice)
+        Log(string.format("Handle console command: %s\n", fullCmd), "TestTagToRowHandleHandler")
+
+        local lib = DataTable.__kismetlib
+        local itemTag = "Inventory.Item.TestItem"
+        local testData = {
+            DataType = "Weapon",
+            DataRow = {
+                RowName = "Test",
+                DataTable = "/Game/Blueprints/Data/DataReference/DT_ItemTags.DT_ItemTags"
+            }
+        }
+
+        DataTable.ModifyRow(itemTag, testData)
+        local row = DataTable.__table:FindRow(itemTag)
+        if row then
+--            Utils.Log(
+--                string.format(
+--                    "ROW: %d - %s - %s\n",
+--                    DataTableParser.ToJson(row.DataType),
+--                    DataTableParser.ToJson(row.DataRow.RowName),
+--                    string.match(row.DataRow.DataTable:GetFullName(), "^DataTable%s+(.*)")),
+--                "main", "TestTagToRowHandleHandler")
+            if row.DataType == 2
+                and DataTableParser.ToJson(row.DataRow.RowName, lib) == testData.DataRow.RowName
+                and string.match(row.DataRow.DataTable:GetFullName(), "^DataTable%s+(.*)") == testData.DataRow.DataTable then
+                outputDevice:Log("[x] Test ModifyRow\n")
+            else
+                outputDevice:Log("[-] Test ModifyRow\n")
+            end
+        else
+            outputDevice:Log("[-] Test ModifyRow\n")
+        end
+
+        DataTable.RemoveRow(itemTag)
+        local row = DataTable.__table:FindRow(itemTag)
+        if not row then
+            outputDevice:Log("[x] Test RemoveRow\n")
+        else
+            outputDevice:Log("[-] Test RemoveRow\n")
+        end
+
+        return true
+    end)
+end
+
 local function Init(dataTable)
     DataTable.__table = dataTable
     DataTable.__name = "TagToRowHandle"
@@ -26,6 +73,8 @@ local function Init(dataTable)
         DataTable.__dumpFile = string.format("%s/Dumps/DT_TagToRowHandle.json", modDirs.__absolute_path)
         Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "Init")
     end
+
+    RegisterTests()
 end
 
 local EStoreCategory = {

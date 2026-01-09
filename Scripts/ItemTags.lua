@@ -12,6 +12,40 @@ end
 
 local DataTable = {}
 
+local function RegisterTests()
+    RegisterConsoleCommandHandler("TestItemTagsHandler", function(fullCmd, params, outputDevice)
+        Log(string.format("Handle console command: %s\n", fullCmd), "TestItemTagsHandler")
+
+        local itemTag = "Inventory.Item.TestItem"
+        local testData = {
+            Tag = "Test",
+            DevComment = "Test"
+        }
+
+        DataTable.ModifyRow(itemTag, testData)
+        local row = DataTable.__table:FindRow(itemTag)
+        if row then
+            if row.Tag:ToString() == testData.Tag and row.DevComment:ToString() == testData.DevComment then
+                outputDevice:Log("[x] Test ModifyRow\n")
+            else
+                outputDevice:Log("[-] Test ModifyRow\n")
+            end
+        else
+            outputDevice:Log("[-] Test ModifyRow\n")
+        end
+
+        DataTable.RemoveRow(itemTag)
+        local row = DataTable.__table:FindRow(itemTag)
+        if not row then
+            outputDevice:Log("[x] Test RemoveRow\n")
+        else
+            outputDevice:Log("[-] Test RemoveRow\n")
+        end
+
+        return true
+    end)
+end
+
 local function Init(dataTable)
     DataTable.__table = dataTable
     DataTable.__name = "ItemTags"
@@ -26,6 +60,8 @@ local function Init(dataTable)
         DataTable.__dumpFile = string.format("%s/Dumps/DT_ItemTags.json", modDirs.__absolute_path)
         Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "Init")
     end
+
+    RegisterTests()
 end
 
 ---Parse FGameplayTagTableRow to table that can be json encoded.

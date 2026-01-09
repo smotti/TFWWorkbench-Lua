@@ -29,6 +29,39 @@ local function Log(message, funcName)
     Utils.Log(message, "ItemDetailsData", funcName)
 end
 
+local function RegisterTests()
+    RegisterConsoleCommandHandler("TestItemDetailsDataHandler", function(fullCmd, params, outputDevice)
+        Log(string.format("Handle console command: %s\n", fullCmd), "TestItemDetailsDataHandler")
+
+        local itemId = "TestItem"
+        local testData = {
+            Category = "Test"
+        }
+
+        DataTable.ModifyRow(itemId, testData)
+        local row = DataTable.__table:FindRow(itemId)
+        if row then
+            if row.Category:ToString() == testData.Category then
+                outputDevice:Log("[x] Test ModifyRow\n")
+            else
+                outputDevice:Log("[-] Test ModifyRow\n")
+            end
+        else
+            outputDevice:Log("[-] Test ModifyRow\n")
+        end
+
+        DataTable.RemoveRow(itemId)
+        local row = DataTable.__table:FindRow(itemId)
+        if not row then
+            outputDevice:Log("[x] Test RemoveRow\n")
+        else
+            outputDevice:Log("[-] Test RemoveRow\n")
+        end
+
+        return true
+    end)
+end
+
 local function Init(dataTable)
     DataTable.__table = dataTable
     DataTable.__name = "ItemDetailsData"
@@ -43,6 +76,8 @@ local function Init(dataTable)
         DataTable.__dumpFile = string.format("%s/Dumps/ItemDetailsData.json", modDirs.__absolute_path)
         Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "InitHandler")
     end
+
+    RegisterTests()
 end
 
 local function ToJsonItemMeshTransform(itemMeshTransform)
@@ -94,6 +129,10 @@ end
 
 ---@param data FInventoryItemDetails
 local function ParseFInventorItemDetails(data)
+    if not data then
+        return {}
+    end
+
     local kismetLib = DataTable.__kismetlib
     return {
         Category = DataTableParser.ToJson(data.Category, kismetLib),
@@ -140,12 +179,12 @@ local function DumpDataTable()
     local item = dataTable:FindRow("FirstAid")
     output["FirstAid"] = ParseFInventorItemDetails(item)
     output["TestItem"] = ParseFInventorItemDetails(dataTable:FindRow("TestItem"))
---    dataTable:ForEachRow(function(rowName, rowData)
---        ---@cast rowName string
---        ---@cast rowData FInventoryItemDetails
---        -- Convert userdata to plain table before adding to output
---        output[rowName] = ParseFInventorItemDetails(rowData)
---    end)
+    --    dataTable:ForEachRow(function(rowName, rowData)
+    --        ---@cast rowName string
+    --        ---@cast rowData FInventoryItemDetails
+    --        -- Convert userdata to plain table before adding to output
+    --        output[rowName] = ParseFInventorItemDetails(rowData)
+    --    end)
 
     if file then
         local success, encodedJson = pcall(function() return json.encode(output) end)
@@ -216,9 +255,6 @@ local function ModifyRow(name, data)
     AddRow(name, parsedRow)
 end
 
---TODO: This might not be save. Even though the item seems to be removed.
---A subsequent DumpDataTable throws an error at the second item in the table.
---Claiming `data` is nil at line 100.
 local function RemoveRow(itemId)
     DataTable.__table:RemoveRow(itemId)
     Log(string.format("Removing row %s\n", itemId), "RemoveRow")
