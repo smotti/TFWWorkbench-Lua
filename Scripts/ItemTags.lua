@@ -55,7 +55,7 @@ local function Init(dataTable)
     local dirs = IterateGameDirectories()
     local modDirs = dirs.Game.Content.Paks.Mods.TFWWorkbench
     if not modDirs then
-        Utils.Log("No such directory Contents/Paks/TFWWorkbench", "Init")
+        Log("No such directory Contents/Paks/TFWWorkbench", "Init")
     else
         DataTable.__dumpFile = string.format("%s/Dumps/DT_ItemTags.json", modDirs.__absolute_path)
         Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "Init")
