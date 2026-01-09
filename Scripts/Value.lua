@@ -41,29 +41,6 @@ function Value:ToFValueOverride(data)
     }
 end
 
-function Value:DumpDataTable()
-    ---@class UDataTable
-    local dataTable = self.__table
-    local output = {}
-    local file = io.open(self.__dumpFile, "w")
-
-    dataTable:ForEachRow(function(rowName, rowData)
-        output[rowName] = self:ParseRowData(rowData)
-    end)
-
-    if file then
-        local success, encodedJson = pcall(function() return json.encode(output) end)
-        if success then
-            file:write(encodedJson)
-            file:close()
-            Log("Successfully wrote JSON file", "DumpDataTable")
-        else
-            file:close()
-            Log("Failed to encode JSON", "DumpDataTable")
-        end
-    end
-end
-
 function Value:AddRow(name, data)
     self.__table:AddRow(name, self:ToFValueOverride(data))
 

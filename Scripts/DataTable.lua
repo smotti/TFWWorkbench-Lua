@@ -1,3 +1,4 @@
+local json = require("json")
 local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 
@@ -37,7 +38,26 @@ function DataTable:ParseRowData(data)
 end
 
 function DataTable:DumpDataTable()
-    Log("Function not implemented", "DumpDataTable")
+    ---@class UDataTable
+    local dataTable = self.__table
+    local output = {}
+    local file = io.open(self.__dumpFile, "w")
+
+    dataTable:ForEachRow(function(rowName, rowData)
+        output[rowName] = self:ParseRowData(rowData)
+    end)
+
+    if file then
+        local success, encodedJson = pcall(function() return json.encode(output) end)
+        if success then
+            file:write(encodedJson)
+            file:close()
+            Log("Successfully wrote JSON file", "DumpDataTable")
+        else
+            file:close()
+            Log("Failed to encode JSON", "DumpDataTable")
+        end
+    end
 end
 
 function DataTable:AddRow(name, data)
