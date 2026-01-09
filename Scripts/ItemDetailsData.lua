@@ -179,6 +179,7 @@ local function DumpDataTable()
     local item = dataTable:FindRow("FirstAid")
     output["FirstAid"] = ParseFInventorItemDetails(item)
     output["TestItem"] = ParseFInventorItemDetails(dataTable:FindRow("TestItem"))
+    output["TestItem2"] = ParseFInventorItemDetails(dataTable:FindRow("TestItem2"))
     --    dataTable:ForEachRow(function(rowName, rowData)
     --        ---@cast rowName string
     --        ---@cast rowData FInventoryItemDetails

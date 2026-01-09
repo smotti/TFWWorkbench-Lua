@@ -117,9 +117,13 @@ ExecuteInGameThread(function()
 
     if IsDataTableValid(ItemDetailsData) and IsDataTableValid(ItemTags) then
         local itemCollection = CollectItems()
+
         Items.AddItems(itemCollection.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+
         for _, itemData in ipairs(itemCollection.Modify) do
             ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
         end
+
+        Items.RemoveItems(itemCollection.Remove, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
     end
 end)

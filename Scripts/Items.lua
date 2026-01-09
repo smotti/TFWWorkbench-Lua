@@ -8,7 +8,16 @@ local Settings = require("Settings")
 local Utils = require("utils")
 
 local function GetParentTag(itemData)
-    return itemData["ItemSubtype"]["ParentTags"][1]["TagName"]
+    local parentTag = itemData["ItemSubtype"]["ParentTags"][1]["TagName"]
+    if type(parentTag) == "string" then
+        return parentTag
+    else
+        --Handling the case where itemData isn't already parsed for json encoding
+        local success, result = pcall(function() return parentTag:ToString() end)
+        if success and result then
+            return result
+        end
+    end
 end
 
 local function MakeItemTag(itemRowName, itemData)
@@ -35,7 +44,22 @@ local function AddItems(items, itemDetailsDataHandler, itemTagsHandler, tagToRow
     end
 end
 
+local function RemoveItems(items, itemDetailsDataHandler, itemTagsHandler, tagToRowHandleHandler)
+    for _, item in ipairs(items) do
+        local itemData = itemDetailsDataHandler.__table:FindRow(item["Name"])
+        if itemData then
+            Utils.Log(string.format("Removing item: %s\n", item["Name"]), "Items", "RemoveItems")
+
+            local itemTag = MakeItemTag(item["Name"], itemData)
+            itemDetailsDataHandler.RemoveRow(item["Name"])
+            itemTagsHandler.RemoveRow(itemTag)
+            tagToRowHandleHandler.RemoveRow(itemTag)
+        end
+    end
+end
+
 return {
-    Add = Add,
-    AddItems = AddItems
+    --    Add = Add,
+    AddItems = AddItems,
+    RemoveItems = RemoveItems
 }
