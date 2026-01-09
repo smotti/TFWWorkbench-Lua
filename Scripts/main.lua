@@ -18,20 +18,28 @@ local TagToRowHandle
 --TODO Write a function that checks if the mod's directory exists.
 --If not it should be created.
 
---[[
-Read all files of the mods `Items` directory. Collect all items
-in a table with the keys being the action (`Add`, `Modify`, `Remove`)
-and the values being the list of items on which that action needs to
-be performed.
-]]
-local function CollectItems()
+local function FindOrCreateModDir()
     local dirs = IterateGameDirectories()
-    local itemsDir = dirs.Game.Content.Paks.Mods.TFWWorkbench.Items
+    local modDir = dirs.Game.Content.Paks.Mods.TFWWorkbench
 
-    if not itemsDir then
-        Utils.Log(string.format("No such directory %s\n", itemsDir.__absolute_path), "main", "AddItems")
-        return
+    if modDir then
+        return modDir
+    else
+        Utils.Log(string.format("No such directory %s/TFWWorkbench\n", dirs.Game.Content.Paks.Mods.__absolute_path),
+            "main")
+        Utils.Log(string.format("Creating directory %s/TFWWorkbench\n", dirs.Game.Content.Paks.Mods.__absolute_path),
+            "main")
+        local success, result, code = os.execute(string.format("mkdir \"%s\\TFWWorkbench\"",
+            dirs.Game.Content.Paks.Mods.__absolute_path))
+        if not success then
+            Utils.Log(string.format("Failed to create directory: %s - %d\n", result, code))
+            return nil
+        else
+            local dirs = IterateGameDirectories()
+            return dirs.Game.Content.Paks.Mods.TFWWorkbench
+        end
     end
+end
 
 local function CollectData(dir)
     Utils.Log(string.format("Collecting data from %s\n", dir.__absolute_path), "main", "CollectData")
@@ -106,6 +114,7 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
 end)
 
 ExecuteInGameThread(function()
+    local modDir = FindOrCreateModDir()
     local dataCollections = {}
     for dirName, dir in pairs(modDir) do
         if not (dirName == "Dumps") then
