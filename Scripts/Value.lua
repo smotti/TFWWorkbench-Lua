@@ -82,10 +82,30 @@ function DataTable:DumpDataTable()
 end
 
 function DataTable:AddRow(name, data)
-    local dataTable = self.__table
-    dataTable:AddRow(name, self:ToFValueOverride(data))
+    self.__table:AddRow(name, self:ToFValueOverride(data))
 
     Log(string.format("Adding row %s\n", name), "AddRow")
+end
+
+function DataTable:ModifyRow(name, data)
+    local oldData = self.__table:FindRow(name)
+    if not oldData then
+        Log(string.format("Failed to find item %s\n", name), "ModifyRow")
+        return
+    end
+
+    local newData = self:ParseFValueOverride(oldData)
+    for k, v in pairs(data) do
+        newData[k] = v
+    end
+
+    self:AddRow(name, newData)
+    Log(string.format("Modifying row %s\n", name), "ModifyRow")
+end
+
+function DataTable:RemoveRow(name)
+    self.__table:RemoveRow(name)
+    Log(string.format("Removing row %s\n", name), "RemoveRow")
 end
 
 return DataTable

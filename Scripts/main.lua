@@ -165,11 +165,19 @@ ExecuteInGameThread(function()
 
     -- NOTE: Not sure if this is the right place to do here. As it requires knowledge about the datas shape.
     -- Which should probably be encapsulated in the corresponding module.
-    for _, element in ipairs(dataCollections.ItemValue.Add) do
-        local dataTableName = Utils.GetDataTableName(element["Data"]["DataTable"])
-        if dataTableName then
-            local handler = ValueHandlers[dataTableName]
-            handler:AddRow(element["Name"], element["Data"])
+    for action, collection in pairs(dataCollections.ItemValue) do
+        for _, element in ipairs(collection) do
+            local dataTableName = Utils.GetDataTableName(element["Data"]["DataTable"])
+            if dataTableName then
+                local handler = ValueHandlers[dataTableName]
+                if action == "Add" then
+                    handler:AddRow(element["Name"], element["Data"])
+                elseif action == "Modify" then
+                    handler:ModifyRow(element["Name"], element["Data"])
+                elseif action == "Remove" then
+                    handler:RemoveRow(element["Name"])
+                end
+            end
         end
     end
 end)
