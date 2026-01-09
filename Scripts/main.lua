@@ -33,44 +33,51 @@ local function CollectItems()
         return
     end
 
-    local itemCollection = {
+local function CollectData(dir)
+    Utils.Log(string.format("Collecting data from %s\n", dir.__absolute_path), "main", "CollectData")
+
+    local collection = {
         Add = {},
         Modify = {},
         Remove = {}
     }
-    for _, itemFile in pairs(itemsDir.__files) do
-        --Utils.Log(string.format("Adding items from %s\n", itemFile.__name), "main", "AddItems")
 
-        local fp = io.open(itemFile.__absolute_path, "r")
+    for _, file in pairs(dir.__files) do
+        local fp = io.open(file.__absolute_path, "r")
         local success, content = pcall(function() return fp:read("a") end)
         if not success then
-            Utils.Log(string.format("Failed to read %s\n", itemFile.__absolute_path))
+            Utils.Log(string.format("Failed to read %s\n", file.__absolute_path))
             fp:close()
         else
             fp:close()
-            local success, itemList = pcall(function() return json.decode(content) end)
+            local success, elementList = pcall(function() return json.decode(content) end)
             if not success then
-                Utils.Log(string.format("Failed to parse contents of %s\n", itemFile.__absolute_path), "main", "AddItems")
+                Utils.Log(string.format("Failed to parse contents of %s\n", file.__absolute_path), "main", "CollectData")
             else
-                for _, itemData in pairs(itemList) do
-                    if itemData["Action"] == "Add" then
-                        Utils.Log(string.format("Add item - ItemName: %s\tFile: %s\n", itemData["Name"], itemFile.__name), "main", "CollectItems")
-                        table.insert(itemCollection.Add, { Name = itemData["Name"], Data = itemData["Data"] })
-                    elseif itemData["Action"] == "Modify" then
-                        Utils.Log(string.format("Modify item - Item: %s\tFile: %s\n", itemData["Name"], itemFile.__name), "main", "CollectItems")
-                        table.insert(itemCollection.Modify, { Name = itemData["Name"], Data = itemData["Data"] })
-                    elseif itemData["Action"] == "Remove" then
-                        Utils.Log(string.format("Remove item - Item: %s\tFile: %s\n", itemData["Name"], itemFile.__name), "main", "CollectItems")
-                        -- NOTE: Probably need some additional data when removing an "Item". Because its
-                        -- tags should also be removed.
-                        table.insert(itemCollection.Remove, { Name = itemData["Name"], Data = itemData["Data"] })
+                for _, element in pairs(elementList) do
+                    if element["Action"] == "Add" then
+                        Utils.Log(
+                            string.format("Add %s - Name: %s\tFile: %s\n", dir.__name, element["Name"], file.__name),
+                            "main",
+                            "CollectData")
+                        table.insert(collection.Add, { Name = element["Name"], Data = element["Data"] })
+                    elseif element["Action"] == "Modify" then
+                        Utils.Log(
+                            string.format("Modify %s - Name: %s\tFile: %s\n", dir.__name, element["Name"], file.__name),
+                            "main", "CollectData")
+                        table.insert(collection.Modify, { Name = element["Name"], Data = element["Data"] })
+                    elseif element["Action"] == "Remove" then
+                        Utils.Log(
+                            string.format("Remove %s - Item: %s\tFile: %s\n", dir.__name, element["Name"], file.__name),
+                            "main", "CollectData")
+                        table.insert(collection.Remove, { Name = element["Name"], Data = element["Data"] })
                     end
                 end
             end
         end
     end
 
-    return itemCollection
+    return collection
 end
 
 local function IsDataTableValid(dataTable)
@@ -99,6 +106,13 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
 end)
 
 ExecuteInGameThread(function()
+    local dataCollections = {}
+    for dirName, dir in pairs(modDir) do
+        if not (dirName == "Dumps") then
+            dataCollections[dirName] = CollectData(dir)
+        end
+    end
+
     ItemDetailsData = StaticFindObject(Settings.DataTableClassNames.ItemDetailsData)
     if IsDataTableValid(ItemDetailsData) then
         ItemDetailsDataHandler.Init(ItemDetailsData)
@@ -119,14 +133,13 @@ ExecuteInGameThread(function()
     -- As a large amount of items could cause the game thread to be locked up. Meaning the game would
     -- take a bit longer to load into the main menu.
     if IsDataTableValid(ItemDetailsData) and IsDataTableValid(ItemTags) then
-        local itemCollection = CollectItems()
+        Items.AddItems(dataCollections.Item.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
 
-        Items.AddItems(itemCollection.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
-
-        for _, itemData in ipairs(itemCollection.Modify) do
+        for _, itemData in ipairs(dataCollections.Item.Modify) do
             ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
         end
 
-        Items.RemoveItems(itemCollection.Remove, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+        Items.RemoveItems(dataCollections.Item.Remove, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+    end
     end
 end)
