@@ -7,6 +7,8 @@ local ItemTagsHandler = require("ItemTags")
 local TagToRowHandleHandler = require("TagToRowHandle")
 local ValueHandler = require("Value")
 local ManufacturingRecipes = require("ManufacturingRecipes")
+local ManufacturingTags = require("ManufacturingTags")
+local CraftingRecipe = require("CraftingRecipe")
 
 
 -- NOTE Required to parse RecipyCraftTime of ManufactoringRecipies
@@ -25,6 +27,7 @@ local ItemTags
 local TagToRowHandle
 
 local ManufacturingRecipesHandler = {}
+local ManufacturingTagsHandler = {}
 local ValueHandlers = {}
 
 local function FindOrCreateModDir()
@@ -108,21 +111,25 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
     outputDevice:Log("Dumping data tables")
     --NOTE: Using async calls here to don't lock up the game thread
     if IsDataTableValid(ItemDetailsData) then
-        ExecuteAsync(function() ItemDetailsDataHandler.DumpDataTable() end)
+        --ExecuteAsync(function() ItemDetailsDataHandler.DumpDataTable() end)
     end
 
     if IsDataTableValid(ItemTags) then
-        ExecuteAsync(function() ItemTagsHandler.DumpDataTable() end)
+        --ExecuteAsync(function() ItemTagsHandler.DumpDataTable() end)
     end
 
     if IsDataTableValid(TagToRowHandle) then
-        ExecuteAsync(function() TagToRowHandleHandler.DumpDataTable() end)
+        --ExecuteAsync(function() TagToRowHandleHandler.DumpDataTable() end)
     end
 
     for _, handler in pairs(ValueHandlers) do
         if IsDataTableValid(handler.__table) then
-            ExecuteAsync(function() handler:DumpDataTable() end)
+            --ExecuteAsync(function() handler:DumpDataTable() end)
         end
+    end
+
+    if IsDataTableValid(ManufacturingTagsHandler.__table) then
+        ExecuteAsync(function() ManufacturingTagsHandler:DumpDataTable() end)
     end
 
     if IsDataTableValid(ManufacturingRecipesHandler.__table) then
@@ -154,6 +161,11 @@ ExecuteInGameThread(function()
     TagToRowHandle = StaticFindObject(Settings.DataTableClassNames.TagToRowHandle)
     if IsDataTableValid(TagToRowHandle) then
         TagToRowHandleHandler.Init(TagToRowHandle)
+    end
+
+    local dataTable = StaticFindObject(Settings.DataTableClassNames.ManufacturingTags)
+    if IsDataTableValid(dataTable) then
+        ManufacturingTagsHandler = ManufacturingTags.new(dataTable)
     end
 
     local dataTable = StaticFindObject(Settings.DataTableClassNames.ManufacturingRecipes)
@@ -202,10 +214,12 @@ ExecuteInGameThread(function()
     end
 
     for action, collection in pairs(dataCollections.CraftingRecipe) do
+        if action == "Add" then
+            CraftingRecipe.AddRecipes(collection, ManufacturingRecipesHandler, ManufacturingTagsHandler)
+        end
+
         for _, element in ipairs(collection) do
-            if action == "Add" then
-                ManufacturingRecipesHandler:AddRow(element["Name"], element["Data"])
-            elseif action == "Modify" then
+            if action == "Modify" then
                 ManufacturingRecipesHandler:ModifyRow(element["Name"], element["Data"])
             elseif action == "Remove" then
                 ManufacturingRecipesHandler:RemoveRow(element["Name"])

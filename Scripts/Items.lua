@@ -3,7 +3,6 @@ A module that manages the concept of an in-game item. Meaning it adds it to
 the `ItemDetailsData` data table. As well as `DT_ItemTags` and `DT_TagToRowHandle`.
 In order to make the item available to other game systems. Like Vendors and Crafting.
 ]]
-local json = require("json")
 local Settings = require("Settings")
 local Utils = require("utils")
 
