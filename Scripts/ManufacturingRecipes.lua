@@ -30,4 +30,44 @@ function ManufacturingRecipes:ParseRowData(data)
     }
 end
 
+function ManufacturingRecipes:AddRow(name, data)
+    ---@class FManufactoringRecipies
+    local rowData = {
+        UsedComponents = data["UsedComponents"],
+        CreatedItems = data["CreatedItems"],
+        RecipyName = data["RecipyName"],
+        RecipyTag = data["RecipyTag"],
+        RecipyGroupTag = data["RecipyGroupTag"],
+        RequiredTags = data["RequiredTags"],
+        -- Row needs to be first added to the table. After that we can modify it.
+        -- Timespan is fairly tricky and attempts to add it via c++ can lead to
+        -- the game crashing when reading that recipe.
+        --RecipyCraftTime = data["RecipyCraftTime"]
+    }
+
+    AddDataTableRow("ManufacturingRecipes", name, rowData)
+    local row = self.__table:FindRow(name)
+    if row and data["RecipyCraftTime"] then
+        row.RecipyCraftTime = data["RecipyCraftTime"]
+    end
+
+    Log(string.format("Added row %s\n", name), "AddRow")
+end
+
+function ManufacturingRecipes:ModifyRow(name, data)
+    local row = self.__table:FindRow(name)
+    if not row then
+        Log(string.format("Failed to find row %s\n", name), "ModifyRow")
+        return
+    end
+
+    local parsedRow = self:ParseRowData(row)
+    for k, v in pairs(data) do
+        parsedRow[k] = v
+    end
+
+    self:AddRow(name, parsedRow)
+    Log(string.format("Modified row %s\n", name), "ModifyRow")
+end
+
 return ManufacturingRecipes

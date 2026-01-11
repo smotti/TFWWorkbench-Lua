@@ -200,4 +200,16 @@ ExecuteInGameThread(function()
             end
         end
     end
+
+    for action, collection in pairs(dataCollections.CraftingRecipe) do
+        for _, element in ipairs(collection) do
+            if action == "Add" then
+                ManufacturingRecipesHandler:AddRow(element["Name"], element["Data"])
+            elseif action == "Modify" then
+                ManufacturingRecipesHandler:ModifyRow(element["Name"], element["Data"])
+            elseif action == "Remove" then
+                ManufacturingRecipesHandler:RemoveRow(element["Name"])
+            end
+        end
+    end
 end)
