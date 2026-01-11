@@ -69,7 +69,8 @@ function DataTable:ModifyRow(name, data)
 end
 
 function DataTable:RemoveRow(name)
-    Log("Function not implemented", "RemoveRow")
+    self.__table:RemoveRow(name)
+    Log(string.format("Remove row %s\n", name), "RemoveRow")
 end
 
 return DataTable

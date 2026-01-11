@@ -60,12 +60,7 @@ function Value:ModifyRow(name, data)
     end
 
     self:AddRow(name, newData)
-    Log(string.format("Modifying row %s\n", name), "ModifyRow")
-end
-
-function Value:RemoveRow(name)
-    self.__table:RemoveRow(name)
-    Log(string.format("Removing row %s\n", name), "RemoveRow")
+    Log(string.format("Modifed row %s\n", name), "ModifyRow")
 end
 
 return Value
