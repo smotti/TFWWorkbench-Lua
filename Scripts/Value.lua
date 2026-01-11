@@ -44,13 +44,13 @@ end
 function Value:AddRow(name, data)
     self.__table:AddRow(name, self:ToFValueOverride(data))
 
-    Log(string.format("Adding row %s\n", name), "AddRow")
+    Log(string.format("Added row %s\n", name), "AddRow")
 end
 
 function Value:ModifyRow(name, data)
     local oldData = self.__table:FindRow(name)
     if not oldData then
-        Log(string.format("Failed to find item %s\n", name), "ModifyRow")
+        Log(string.format("Failed to find value %s\n", name), "ModifyRow")
         return
     end
 

@@ -101,22 +101,22 @@ local function DumpDataTable()
 end
 
 local function AddRow(itemTag)
-    Log(string.format("Adding row %s\n", itemTag), "AddRow")
     DataTable.__table:AddRow(itemTag, { Tag = FName(itemTag, EFindName.FNAME_Add), DevComment = "" })
+    Log(string.format("Added row %s\n", itemTag), "AddRow")
 end
 
 --NOTE: Not sure if we should really have that. I guess it could come in handy eventually. To redirect
 --the game to another item instead of the original.
 local function ModifyRow(itemTag, tagData)
-    Log(string.format("Modifying row %s - %s\n", itemTag, Utils.PrintTable(tagData)), "ModifyRow")
     DataTable.__table:AddRow(
         itemTag,
         { Tag = FName(tagData.Tag, EFindName.FNAME_Add), DevComment = tagData.DevComment })
+    Log(string.format("Modifed row %s - %s\n", itemTag, Utils.PrintTable(tagData)), "ModifyRow")
 end
 
 local function RemoveRow(itemTag)
-    Log(string.format("Removing row %s\n", itemTag), "RemoveRow")
     DataTable.__table:RemoveRow(itemTag)
+    Log(string.format("Removed row %s\n", itemTag), "RemoveRow")
 end
 
 DataTable.Init = Init

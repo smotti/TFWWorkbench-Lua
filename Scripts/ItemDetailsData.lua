@@ -229,9 +229,9 @@ local function AddRow(name, data)
     }
 
     -- Need to use custom function that's implemented in the C++ part of this mod.
-    AddInventoryItemRow(name, rowData)
+    AddDataTableRow("InventoryItemDetails", name, rowData)
 
-    Log(string.format("Adding row %s\n", name), "AddRow")
+    Log(string.format("Added row %s\n", name), "AddRow")
 end
 
 local function ModifyRow(name, data)
@@ -252,13 +252,13 @@ local function ModifyRow(name, data)
         end
     end
 
-    Log(string.format("Modifying row %s by calling AddRow\n", name), "ModifyRow")
+    Log(string.format("Modifed row %s by calling AddRow\n", name), "ModifyRow")
     AddRow(name, parsedRow)
 end
 
 local function RemoveRow(itemId)
     DataTable.__table:RemoveRow(itemId)
-    Log(string.format("Removing row %s\n", itemId), "RemoveRow")
+    Log(string.format("Removed row %s\n", itemId), "RemoveRow")
 end
 
 -- Export module functions

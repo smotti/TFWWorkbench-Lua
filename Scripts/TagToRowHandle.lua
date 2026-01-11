@@ -148,7 +148,7 @@ local function AddRow(itemTag, data)
         }
     }
     DataTable.__table:AddRow(itemTag, fwItemType)
-    Log(string.format("Adding row %s\n", itemTag), "AddRow")
+    Log(string.format("Added row %s\n", itemTag), "AddRow")
 end
 
 local function ModifyRow(itemTag, data)
@@ -160,12 +160,12 @@ local function ModifyRow(itemTag, data)
         }
     }
     DataTable.__table:AddRow(itemTag, fwItemType)
-    Log(string.format("Modifying row %s - %s\n", itemTag, Utils.PrintTable(data)), "ModifyRow")
+    Log(string.format("Modifed row %s - %s\n", itemTag, Utils.PrintTable(data)), "ModifyRow")
 end
 
 local function RemoveRow(itemTag)
     DataTable.__table:RemoveRow(itemTag)
-    Log(string.format("Removing row %s\n", itemTag), "RemoveRow")
+    Log(string.format("Removed row %s\n", itemTag), "RemoveRow")
 end
 
 DataTable.Init = Init
