@@ -1,4 +1,5 @@
 local json = require("json")
+local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 local Settings = require("Settings")
 local ItemDetailsDataHandler = require("ItemDetailsData")
@@ -6,6 +7,7 @@ local Items = require("Items")
 local ItemTagsHandler = require("ItemTags")
 local TagToRowHandleHandler = require("TagToRowHandle")
 local ValueHandler = require("Value")
+local ManufacturingGroups = require("ManufacturingGroups")
 local ManufacturingRecipes = require("ManufacturingRecipes")
 local ManufacturingTags = require("ManufacturingTags")
 local CraftingRecipe = require("CraftingRecipe")
@@ -26,6 +28,7 @@ local ItemTags
 ---@class UDataTable
 local TagToRowHandle
 
+local ManufacturingGroupsHandler = {}
 local ManufacturingRecipesHandler = {}
 local ManufacturingTagsHandler = {}
 local ValueHandlers = {}
@@ -104,6 +107,17 @@ local function IsDataTableValid(dataTable)
     return dataTable and dataTable:IsValid()
 end
 
+-- Used as a workaround for failing to load some tables at mod startup
+NotifyOnNewObject("/Script/Engine.DataTable", function(dataTable)
+    local fullName = dataTable:GetFullName()
+    --Utils.Log(string.format("New DataTable loaded: %s\n", fullName), "main", "NotifyOnNewObject")
+
+    if Utils.GetDataTableName(fullName) == "DT_ManufactoringGroups" then
+        Utils.Log(string.format("DataTable %s loaded: %s\n", "ManufacturingGroups", fullName), "main", "NotifyOnNewObject")
+        ManufacturingGroupsHandler = ManufacturingGroups.new(dataTable)
+    end
+end)
+
 RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, outputDevice)
     Utils.Log("Handle console command 'DumpDataTables'\n", "main")
     Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
@@ -136,10 +150,15 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
         ExecuteAsync(function() ManufacturingRecipesHandler:DumpDataTable() end)
     end
 
+    if IsDataTableValid(ManufacturingGroupsHandler.__table) then
+        ExecuteAsync(function() ManufacturingGroupsHandler:DumpDataTable() end)
+    end
+
     return true
 end)
 
 ExecuteInGameThread(function()
+    -- Create mod dir if not present and collect data from mod dirs
     local modDir = FindOrCreateModDir()
     local dataCollections = {}
     for dirName, dir in pairs(modDir) do
@@ -148,6 +167,7 @@ ExecuteInGameThread(function()
         end
     end
 
+    -- Initialize data table handlers
     ItemDetailsData = StaticFindObject(Settings.DataTableClassNames.ItemDetailsData)
     if IsDataTableValid(ItemDetailsData) then
         ItemDetailsDataHandler.Init(ItemDetailsData)

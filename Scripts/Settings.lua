@@ -14,6 +14,7 @@ Settings.DataTableClassNames = {
     ItemDetailsData = "/Game/Blueprints/Data/ItemDetailsData.ItemDetailsData",
     ItemGameplayTags = "/Game/Blueprints/Data/ItemGameplayTags.ItemGameplayTags",
     ItemTags = "/Game/Blueprints/Data/DataReference/DT_ItemTags.DT_ItemTags",
+    ManufacturingGroups = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringGroups.DT_ManufactoringGroups",
     ManufacturingRecipes = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringRecipies.DT_ManufactoringRecipies",
     ManufacturingTags = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringTags.DT_ManufactoringTags",
     TagToRowHandle = "/Game/Blueprints/Data/DataReference/DT_TagToRowHandle.DT_TagToRowHandle",
