@@ -31,9 +31,23 @@ function ManufacturingGroups:ParseRowData(data)
 end
 
 function ManufacturingGroups:AddRow(name, data)
-end
+    ---@class FManufactoringGroups
+    local rowData = {
+        ManufactoringGroupName = data["ManufactoringGroupName"],
+        ManufactoringGroupSubtext = data["ManufactoringGroupSubtext"],
+        ManufactoringGroupIcon = data["ManufactoringGroupIcon"],
+        ManufactoringGroupDetailsText = data["ManufactoringGroupDetailsText"],
+        ManufactoringDetailsGroupIcon = data["ManufactoringDetailsGroupIcon"],
+        ManufactoringRecipies = data["ManufactoringRecipies"],
+        FilterTag = data["FilterTag"]
+    }
 
-function ManufacturingGroups:ModifyRow(name, data)
+    local success = pcall(function() AddDataTableRow("ManufacturingGroups", name, rowData) end)
+    if not success then
+        Log(string.format("Failed to add row %s\n", name), "AddRow")
+    else
+        Log(string.format("Added row %s\n", name), "AddRow")
+    end
 end
 
 return ManufacturingGroups

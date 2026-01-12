@@ -33,6 +33,13 @@ local ManufacturingRecipesHandler = {}
 local ManufacturingTagsHandler = {}
 local ValueHandlers = {}
 
+local DataCollections = {
+    Item = {},
+    ItemValue = {},
+    CraftingRecipe = {},
+    CraftingGroup = {}
+}
+
 local function FindOrCreateModDir()
     local dirs = IterateGameDirectories()
     local modDir = dirs.Game.Content.Paks.Mods.TFWWorkbench
@@ -113,8 +120,20 @@ NotifyOnNewObject("/Script/Engine.DataTable", function(dataTable)
     --Utils.Log(string.format("New DataTable loaded: %s\n", fullName), "main", "NotifyOnNewObject")
 
     if Utils.GetDataTableName(fullName) == "DT_ManufactoringGroups" then
-        Utils.Log(string.format("DataTable %s loaded: %s\n", "ManufacturingGroups", fullName), "main", "NotifyOnNewObject")
+        Utils.Log(string.format("DataTable %s loaded: %s\n", "ManufacturingGroups", fullName), "main",
+            "NotifyOnNewObject")
         ManufacturingGroupsHandler = ManufacturingGroups.new(dataTable)
+
+        -- Have to wait a bit until data table is fully loaded
+        ExecuteWithDelay(200, function()
+            for _, group in ipairs(DataCollections.CraftingGroup.Add) do
+                ManufacturingGroupsHandler:AddRow(group["Name"], group["Data"])
+            end
+
+            for _, group in ipairs(DataCollections.CraftingGroup.Modify) do
+                ManufacturingGroupsHandler:ModifyRow(group["Name"], group["Data"])
+            end
+        end)
     end
 end)
 
