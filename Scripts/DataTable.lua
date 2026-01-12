@@ -65,7 +65,19 @@ function DataTable:AddRow(name, data)
 end
 
 function DataTable:ModifyRow(name, data)
-    Log("Function not implemented", "ModifyRow")
+    local row = self.__table:FindRow(name)
+    if not row then
+        Log(string.format("Failed to find row %s\n", name), "ModifyRow")
+        return
+    end
+
+    local parsedRow = self:ParseRowData(row)
+    for k, v in pairs(data) do
+        parsedRow[k] = v
+    end
+
+    self:AddRow(name, parsedRow)
+    Log(string.format("Modified row %s\n", name), "ModifyRow")
 end
 
 function DataTable:RemoveRow(name)

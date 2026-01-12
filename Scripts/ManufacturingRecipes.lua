@@ -54,20 +54,4 @@ function ManufacturingRecipes:AddRow(name, data)
     Log(string.format("Added row %s\n", name), "AddRow")
 end
 
-function ManufacturingRecipes:ModifyRow(name, data)
-    local row = self.__table:FindRow(name)
-    if not row then
-        Log(string.format("Failed to find row %s\n", name), "ModifyRow")
-        return
-    end
-
-    local parsedRow = self:ParseRowData(row)
-    for k, v in pairs(data) do
-        parsedRow[k] = v
-    end
-
-    self:AddRow(name, parsedRow)
-    Log(string.format("Modified row %s\n", name), "ModifyRow")
-end
-
 return ManufacturingRecipes
