@@ -1,5 +1,6 @@
 local DataTable = require("DataTable")
 local Parser = require("DataTableParser")
+local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 
 
@@ -26,10 +27,9 @@ function ManufacturingTags:ParseRowData(data)
 end
 
 function ManufacturingTags:AddRow(name, data)
-    Log(string.format("DATA: %s\n", Utils.PrintTable(data)), "AddRow")
     ---@class FGameplayTagTableRow
     local rowData = {
-        Tag = FName(data["Tag"], EFindName.FNAME_Add),
+        Tag = UEHelpers.FindOrAddFName(data["Tag"]),
         DevComment = data["DevComment"]
     }
 

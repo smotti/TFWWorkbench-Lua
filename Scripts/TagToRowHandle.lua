@@ -143,7 +143,7 @@ local function AddRow(itemTag, data)
     local fwItemType = {
         DataType = EStoreCategory[data["DataType"]],
         DataRow = {
-            RowName = FName(data["Name"], EFindName.FNAME_Add),
+            RowName = UEHelpers.FindOrAddFName(data["Name"]),
             DataTable = StaticFindObject(data["DataTable"])
         }
     }
@@ -155,7 +155,7 @@ local function ModifyRow(itemTag, data)
     local fwItemType = {
         DataType = EStoreCategory[data["DataType"]],
         DataRow = {
-            RowName = FName(data["DataRow"]["RowName"], EFindName.FNAME_Add),
+            RowName = UEHelpers.FindOrAddFName(data["DataRow"]["RowName"]),
             DataTable = StaticFindObject(data["DataRow"]["DataTable"])
         }
     }
