@@ -212,18 +212,11 @@ ExecuteInGameThread(function()
             end
         end
     end
-
-    for action, collection in pairs(dataCollections.CraftingRecipe) do
-        if action == "Add" then
-            CraftingRecipe.AddRecipes(collection, ManufacturingRecipesHandler, ManufacturingTagsHandler)
+    CraftingRecipe.AddRecipes(dataCollections.CraftingRecipe.Add, ManufacturingRecipesHandler, ManufacturingTagsHandler)
+    -- NOTE: Have to wait a bit for FName registration, otherwise parsing of newly added FName values can fail and cause a crash
+    ExecuteWithDelay(3500, function()
+        for _, element in ipairs(dataCollections.CraftingRecipe.Modify) do
+            ManufacturingRecipesHandler:ModifyRow(element["Name"], element["Data"])
         end
-
-        for _, element in ipairs(collection) do
-            if action == "Modify" then
-                ManufacturingRecipesHandler:ModifyRow(element["Name"], element["Data"])
-            elseif action == "Remove" then
-                ManufacturingRecipesHandler:RemoveRow(element["Name"])
-            end
-        end
-    end
+    end)
 end)
