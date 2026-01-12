@@ -114,28 +114,54 @@ local function IsDataTableValid(dataTable)
     return dataTable and dataTable:IsValid()
 end
 
--- Used as a workaround for failing to load some tables at mod startup
-NotifyOnNewObject("/Script/Engine.DataTable", function(dataTable)
-    local fullName = dataTable:GetFullName()
-    --Utils.Log(string.format("New DataTable loaded: %s\n", fullName), "main", "NotifyOnNewObject")
-
-    if Utils.GetDataTableName(fullName) == "DT_ManufactoringGroups" then
-        Utils.Log(string.format("DataTable %s loaded: %s\n", "ManufacturingGroups", fullName), "main",
-            "NotifyOnNewObject")
-        ManufacturingGroupsHandler = ManufacturingGroups.new(dataTable)
-
-        -- Have to wait a bit until data table is fully loaded
-        ExecuteWithDelay(200, function()
-            for _, group in ipairs(DataCollections.CraftingGroup.Add) do
-                ManufacturingGroupsHandler:AddRow(group["Name"], group["Data"])
-            end
-
-            for _, group in ipairs(DataCollections.CraftingGroup.Modify) do
-                ManufacturingGroupsHandler:ModifyRow(group["Name"], group["Data"])
-            end
-        end)
+-- NOTE: Doesn't work as intended. Table isn't fully loaded into memory.
+-- Some data tables aren't loaded when the game launches. But only via in-game
+-- triggers.
+-- Tables the need to be loaded on mod startup:
+-- - DT_ManufactoringGroups
+local function LoadDataTableAssets()
+    local assetRegistryHelpers = StaticFindObject("/Script/AssetRegistry.Default__AssetRegistryHelpers")
+    if not assetRegistryHelpers:IsValid() then
+        Utils.Log("AssetRegistryHelpers is not valid\n", "main", "LoadDataTableAssets")
     end
-end)
+
+    local assetRegistry = nil
+    if assetRegistryHelpers then
+        assetRegistry = assetRegistryHelpers:GetAssetRegistry()
+        if not assetRegistry:IsValid() then
+            assetRegistry = StaticFindObject("/Script/AssetRegistry.Default__AssetRegistryImpl")
+        end
+    end
+
+    if not assetRegistry or not assetRegistry:IsValid() then
+        Utils.Log("AssetRegistry is not valid. Can't load data table assets!\n", "main", "LoadDataTableAssets")
+        return
+    end
+
+    local assetData = {
+        ManufacturingGroups = {
+            ["PackageName"] = UEHelpers.FindOrAddFName("/Game/FW/UI/Manufactoring/Data/DT_ManufactoringGroups"),
+            ["AssetName"] = UEHelpers.FindOrAddFName("DT_ManufactoringGroups")
+        }
+    }
+
+    for tableName, data in pairs(assetData) do
+        Utils.Log(string.format("Loading data table asset for %s\n", tableName), "main", "LoadDataTableAssets")
+        local assetClass = assetRegistryHelpers:GetAsset(data)
+        if not assetClass:IsValid() then
+            Utils.Log(string.format("Failed to load data table asset for %s\n", tableName), "main", "LoadDataTableAssets")
+        else
+            Utils.Log(
+                string.format("Successfully loaded data table asset for %s: %s\n", tableName, assetClass:GetFullName()),
+                "main",
+                "LoadDataTableAssets")
+            -- Adding to the GameInstance's ReferencedObjects so it doesn't get gargabe colllected
+            local gameInstance = UEHelpers.GetGameInstance()
+            local numRefObjects = gameInstance.ReferencedObjects:GetArrayNum()
+            gameInstance.ReferencedObjects[numRefObjects+1] = assetClass
+        end
+    end
+end
 
 RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, outputDevice)
     Utils.Log("Handle console command 'DumpDataTables'\n", "main")
@@ -182,9 +208,11 @@ ExecuteInGameThread(function()
     local dataCollections = {}
     for dirName, dir in pairs(modDir) do
         if not (dirName == "Dumps") then
-            dataCollections[dirName] = CollectData(dir)
+            DataCollections[dirName] = CollectData(dir)
         end
     end
+
+    LoadDataTableAssets()
 
     -- Initialize data table handlers
     ItemDetailsData = StaticFindObject(Settings.DataTableClassNames.ItemDetailsData)
@@ -252,10 +280,19 @@ ExecuteInGameThread(function()
         end
     end
     CraftingRecipe.AddRecipes(dataCollections.CraftingRecipe.Add, ManufacturingRecipesHandler, ManufacturingTagsHandler)
+    CraftingRecipe.AddRecipes(DataCollections.CraftingRecipe.Add, ManufacturingRecipesHandler, ManufacturingTagsHandler)
     -- NOTE: Have to wait a bit for FName registration, otherwise parsing of newly added FName values can fail and cause a crash
     ExecuteWithDelay(3500, function()
         for _, element in ipairs(dataCollections.CraftingRecipe.Modify) do
             ManufacturingRecipesHandler:ModifyRow(element["Name"], element["Data"])
         end
     end)
+
+    for _, group in ipairs(DataCollections.CraftingGroup.Add) do
+        ManufacturingGroupsHandler:AddRow(group["Name"], group["Data"])
+    end
+
+    for _, group in ipairs(DataCollections.CraftingGroup.Modify) do
+        ManufacturingGroupsHandler:ModifyRow(group["Name"], group["Data"])
+    end
 end)
