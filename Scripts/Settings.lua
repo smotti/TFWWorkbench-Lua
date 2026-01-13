@@ -26,4 +26,24 @@ Settings.ValueTables = {
     "/Game/Blueprints/Data/Value/ValueV2_WEAPONS.ValueV2_WEAPONS"
 }
 
+-- Required data of data tables who need to call the AddDataTableRow of the mod's DLL
+Settings.DataTables = {
+    InventoryItemDetails = {
+        Path = "/Game/Blueprints/Data/ItemDetailsData.ItemDetailsData",
+        SourceRow = "FirstAid"
+    },
+    ManufacturingGroups = {
+        Path = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringGroups.DT_ManufactoringGroups",
+        SourceRow = "CryoAmmo"
+    },
+    ManufacturingRecipes = {
+        Path = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringRecipies.DT_ManufactoringRecipies",
+        SourceRow = "DA_CigarettesForCryo545"
+    },
+    VendorData = {
+        Path = "/Game/Blueprints/Data/VendorDataTable.VendorDataTable",
+        SourceRow = "WesternWeaponVendor"
+    }
+}
+
 return Settings

@@ -114,7 +114,6 @@ local function IsDataTableValid(dataTable)
     return dataTable and dataTable:IsValid()
 end
 
--- NOTE: Doesn't work as intended. Table isn't fully loaded into memory.
 -- Some data tables aren't loaded when the game launches. But only via in-game
 -- triggers.
 -- Tables the need to be loaded on mod startup:
@@ -158,8 +157,15 @@ local function LoadDataTableAssets()
             -- Adding to the GameInstance's ReferencedObjects so it doesn't get gargabe colllected
             local gameInstance = UEHelpers.GetGameInstance()
             local numRefObjects = gameInstance.ReferencedObjects:GetArrayNum()
-            gameInstance.ReferencedObjects[numRefObjects+1] = assetClass
+            gameInstance.ReferencedObjects[numRefObjects + 1] = assetClass
         end
+    end
+end
+
+-- Providing the DLL part of the mod with the required data table data
+local function InitDataTables()
+    for tableName, details in pairs(Settings.DataTables) do
+        ConfigureDataTables(tableName, details.Path, details.SourceRow)
     end
 end
 
@@ -212,6 +218,7 @@ ExecuteInGameThread(function()
     end
 
     LoadDataTableAssets()
+    InitDataTables()
 
     -- Initialize data table handlers
     ItemDetailsData = StaticFindObject(Settings.DataTableClassNames.ItemDetailsData)
