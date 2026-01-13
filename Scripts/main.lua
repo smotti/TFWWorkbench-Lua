@@ -11,6 +11,7 @@ local ManufacturingGroups = require("ManufacturingGroups")
 local ManufacturingRecipes = require("ManufacturingRecipes")
 local ManufacturingTags = require("ManufacturingTags")
 local CraftingRecipe = require("CraftingRecipe")
+local VendorData = require("VendorData")
 
 
 -- NOTE Required to parse RecipyCraftTime of ManufactoringRecipies
@@ -32,12 +33,14 @@ local ManufacturingGroupsHandler = {}
 local ManufacturingRecipesHandler = {}
 local ManufacturingTagsHandler = {}
 local ValueHandlers = {}
+local VendorDataHandler = {}
 
 local DataCollections = {
     Item = {},
     ItemValue = {},
     CraftingRecipe = {},
-    CraftingGroup = {}
+    CraftingGroup = {},
+    VendorData = {},
 }
 
 local function FindOrCreateModDir()
@@ -267,16 +270,18 @@ ExecuteInGameThread(function()
         end
     end
 
+    local dataTable = StaticFindObject(Settings.DataTableClassNames.VendorData)
+    if IsDataTableValid(dataTable) then
+        VendorDataHandler = VendorData.new(dataTable)
+    end
+
     -- NOTE: These Add/Modify/Remove function calls could potentially also be called asynchronously
     -- if there are ever any "performance" concerns. Though it's more a user experience thing.
     -- As a large amount of items could cause the game thread to be locked up. Meaning the game would
     -- take a bit longer to load into the main menu.
-    if IsDataTableValid(ItemDetailsData) and IsDataTableValid(ItemTags) then
-        Items.AddItems(dataCollections.Item.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
-
-        for _, itemData in ipairs(dataCollections.Item.Modify) do
-            ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
-        end
+    ExecuteWithDelay(100, function()
+        Items.AddItems(DataCollections.Item.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+    end)
 
         Items.RemoveItems(dataCollections.Item.Remove, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
     end
@@ -327,9 +332,10 @@ ExecuteInGameThread(function()
         end
     end)
 
+    -- VendorData
     ExecuteWithDelay(100, function()
-        for _, group in ipairs(DataCollections.CraftingGroup.Remove) do
-            ManufacturingGroupsHandler:RemoveRow(group["Name"])
+        for _, vendorData in ipairs(DataCollections.VendorData.Modify) do
+            VendorDataHandler:ModifyRow(vendorData["Name"], vendorData["Data"])
         end
     end)
 end)

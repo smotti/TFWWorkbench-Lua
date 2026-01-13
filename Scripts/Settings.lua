@@ -1,5 +1,7 @@
 --- Global settings and configuration for TFWData mod
 --- This module provides centralized configuration for debug flags and data table paths
+--- 
+--- TODO: See if it makes sense to remove the duplicated data table names/paths
 
 local Settings = {}
 
@@ -12,6 +14,7 @@ Settings.DataTableClassNames = {
     ManufacturingRecipes = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringRecipies.DT_ManufactoringRecipies",
     ManufacturingTags = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringTags.DT_ManufactoringTags",
     TagToRowHandle = "/Game/Blueprints/Data/DataReference/DT_TagToRowHandle.DT_TagToRowHandle",
+    VendorData = "/Game/Blueprints/Data/VendorDataTable.VendorDataTable"
 }
 Settings.ValueTables = {
     "/Game/Blueprints/Data/Value/LEGACY_ItemValueOverrideData.LEGACY_ItemValueOverrideData",
