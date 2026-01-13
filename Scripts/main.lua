@@ -295,19 +295,33 @@ ExecuteInGameThread(function()
     -- NOTE: Have to wait a bit for FName registration, otherwise parsing of newly added FName values can fail and cause a crash
     ExecuteWithDelay(3500, function()
         for _, element in ipairs(dataCollections.CraftingRecipe.Modify) do
+    -- ManufacturingRecipes
+    ExecuteWithDelay(100, function()
+        CraftingRecipe.AddRecipes(DataCollections.CraftingRecipe.Add, ManufacturingRecipesHandler,
+            ManufacturingTagsHandler)
+    end)
+    ExecuteWithDelay(100, function()
+        for _, element in ipairs(DataCollections.CraftingRecipe.Modify) do
             ManufacturingRecipesHandler:ModifyRow(element["Name"], element["Data"])
         end
     end)
 
-    for _, group in ipairs(DataCollections.CraftingGroup.Add) do
-        ManufacturingGroupsHandler:AddRow(group["Name"], group["Data"])
-    end
+    -- ManufacturingGroups
+    ExecuteWithDelay(100, function()
+        for _, group in ipairs(DataCollections.CraftingGroup.Add) do
+            ManufacturingGroupsHandler:AddRow(group["Name"], group["Data"])
+        end
+    end)
 
-    for _, group in ipairs(DataCollections.CraftingGroup.Modify) do
-        ManufacturingGroupsHandler:ModifyRow(group["Name"], group["Data"])
-    end
+    ExecuteWithDelay(100, function()
+        for _, group in ipairs(DataCollections.CraftingGroup.Modify) do
+            ManufacturingGroupsHandler:ModifyRow(group["Name"], group["Data"])
+        end
+    end)
 
-    for _, group in ipairs(DataCollections.CraftingGroup.Remove) do
-        ManufacturingGroupsHandler:RemoveRow(group["Name"])
-    end
+    ExecuteWithDelay(100, function()
+        for _, group in ipairs(DataCollections.CraftingGroup.Remove) do
+            ManufacturingGroupsHandler:RemoveRow(group["Name"])
+        end
+    end)
 end)
