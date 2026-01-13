@@ -3,12 +3,6 @@
 
 local Settings = {}
 
--- Debug configuration flags
-Settings.DEBUG = true
-Settings.DEBUG_PRINT_ALL = false
-Settings.DEBUG_PRINT_ROWNAMES = false
-Settings.DEBUG_PRINT_ROWS = true
-
 -- Data table class names/paths
 Settings.DataTableClassNames = {
     ItemDetailsData = "/Game/Blueprints/Data/ItemDetailsData.ItemDetailsData",
