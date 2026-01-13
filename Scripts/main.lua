@@ -214,6 +214,9 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
 
     if IsDataTableValid(ManufacturingGroupsHandler.__table) then
         ExecuteAsync(function() ManufacturingGroupsHandler:DumpDataTable() end)
+
+    if IsDataTableValid(VendorDataHandler.__table) then
+        ExecuteAsync(function() VendorDataHandler:DumpDataTable() end)
     end
 
     return true
@@ -283,7 +286,8 @@ ExecuteInGameThread(function()
         Items.AddItems(DataCollections.Item.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
     end)
 
-        Items.RemoveItems(dataCollections.Item.Remove, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+    for _, itemData in ipairs(DataCollections.Item.Modify) do
+        ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
     end
 
     -- NOTE: Not sure if this is the right place to do here. As it requires knowledge about the datas shape.
@@ -303,11 +307,6 @@ ExecuteInGameThread(function()
             end
         end
     end
-    CraftingRecipe.AddRecipes(dataCollections.CraftingRecipe.Add, ManufacturingRecipesHandler, ManufacturingTagsHandler)
-    CraftingRecipe.AddRecipes(DataCollections.CraftingRecipe.Add, ManufacturingRecipesHandler, ManufacturingTagsHandler)
-    -- NOTE: Have to wait a bit for FName registration, otherwise parsing of newly added FName values can fail and cause a crash
-    ExecuteWithDelay(3500, function()
-        for _, element in ipairs(dataCollections.CraftingRecipe.Modify) do
     -- ManufacturingRecipes
     ExecuteWithDelay(100, function()
         CraftingRecipe.AddRecipes(DataCollections.CraftingRecipe.Add, ManufacturingRecipesHandler,
