@@ -205,7 +205,6 @@ end)
 ExecuteInGameThread(function()
     -- Create mod dir if not present and collect data from mod dirs
     local modDir = FindOrCreateModDir()
-    local dataCollections = {}
     for dirName, dir in pairs(modDir) do
         if not (dirName == "Dumps") then
             DataCollections[dirName] = CollectData(dir)
@@ -238,6 +237,11 @@ ExecuteInGameThread(function()
     local dataTable = StaticFindObject(Settings.DataTableClassNames.ManufacturingRecipes)
     if IsDataTableValid(dataTable) then
         ManufacturingRecipesHandler = ManufacturingRecipes.new(dataTable)
+    end
+
+    local dataTable = StaticFindObject(Settings.DataTableClassNames.ManufacturingGroups)
+    if IsDataTableValid(dataTable) then
+        ManufacturingGroupsHandler = ManufacturingGroups.new(dataTable)
     end
 
     for _, path in ipairs(Settings.ValueTables) do
@@ -294,5 +298,9 @@ ExecuteInGameThread(function()
 
     for _, group in ipairs(DataCollections.CraftingGroup.Modify) do
         ManufacturingGroupsHandler:ModifyRow(group["Name"], group["Data"])
+    end
+
+    for _, group in ipairs(DataCollections.CraftingGroup.Remove) do
+        ManufacturingGroupsHandler:RemoveRow(group["Name"])
     end
 end)
