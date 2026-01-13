@@ -35,14 +35,22 @@ local function ToJson(value, kismetLib)
             value:ForEachProperty(function(property)
                 local propertyName = property:GetFName():ToString()
                 Log(string.format("UScriptStruct Property: %s\n", propertyName), "ToJson")
-                result[propertyName] = ToJson(value[propertyName])
+                result[propertyName] = ToJson(value[propertyName], kismetLib)
             end)
             return result
         elseif str:match("TArray") then
             local result = {}
             value:ForEach(function(index, element)
-                result[index] = ToJson(element:get())
+                result[index] = ToJson(element:get(), kismetLib)
                 Log(string.format("TArray: %d - %s\n", index, tostring(result[index])), "ToJson")
+            end)
+            return result
+        elseif str:match("TMap") then
+            local result = {}
+            value:ForEach(function(key, value)
+                local k = key:get():ToString()
+                result[k] = ToJson(value:get(), kismetLib)
+                Log(string.format("TMap: %s - %s\n", k, value:get()))
             end)
             return result
         elseif str:match("UDataTable") then
