@@ -145,19 +145,27 @@ local function LoadDataTableAssets()
     }
 
     for tableName, data in pairs(assetData) do
-        Utils.Log(string.format("Loading data table asset for %s\n", tableName), "main", "LoadDataTableAssets")
-        local assetClass = assetRegistryHelpers:GetAsset(data)
-        if not assetClass:IsValid() then
-            Utils.Log(string.format("Failed to load data table asset for %s\n", tableName), "main", "LoadDataTableAssets")
-        else
-            Utils.Log(
-                string.format("Successfully loaded data table asset for %s: %s\n", tableName, assetClass:GetFullName()),
-                "main",
+        local obj = StaticFindObject(Settings.DataTableClassNames.ManufacturingGroups)
+        if obj and obj:IsValid() then
+            Utils.Log(string.format("Asset already loaded, skipping: %s\n", Utils.PrintTable(data)), "main",
                 "LoadDataTableAssets")
-            -- Adding to the GameInstance's ReferencedObjects so it doesn't get gargabe colllected
-            local gameInstance = UEHelpers.GetGameInstance()
-            local numRefObjects = gameInstance.ReferencedObjects:GetArrayNum()
-            gameInstance.ReferencedObjects[numRefObjects + 1] = assetClass
+        else
+            Utils.Log(string.format("Loading data table asset for %s\n", tableName), "main", "LoadDataTableAssets")
+            local assetClass = assetRegistryHelpers:GetAsset(data)
+            if not assetClass:IsValid() then
+                Utils.Log(string.format("Failed to load data table asset for %s\n", tableName), "main",
+                    "LoadDataTableAssets")
+            else
+                Utils.Log(
+                    string.format("Successfully loaded data table asset for %s: %s\n", tableName,
+                        assetClass:GetFullName()),
+                    "main",
+                    "LoadDataTableAssets")
+                -- Adding to the GameInstance's ReferencedObjects so it doesn't get gargabe colllected
+                local gameInstance = UEHelpers.GetGameInstance()
+                local numRefObjects = gameInstance.ReferencedObjects:GetArrayNum()
+                gameInstance.ReferencedObjects[numRefObjects + 1] = assetClass
+            end
         end
     end
 end
