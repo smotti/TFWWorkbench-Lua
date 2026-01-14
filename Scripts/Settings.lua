@@ -16,6 +16,7 @@ Settings.DataTableClassNames = {
     TagToRowHandle = "/Game/Blueprints/Data/DataReference/DT_TagToRowHandle.DT_TagToRowHandle",
     VendorData = "/Game/Blueprints/Data/VendorDataTable.VendorDataTable",
     WeaponsDetailsData = "/Game/Blueprints/Data/WeaponsDetailsData.WeaponsDetailsData",
+    WeaponPartStatsData = "/Game/FW/Weapons/Customizer/WeaponPartStatsData.WeaponPartStatsData"
 }
 Settings.ValueTables = {
     "/Game/Blueprints/Data/Value/LEGACY_ItemValueOverrideData.LEGACY_ItemValueOverrideData",

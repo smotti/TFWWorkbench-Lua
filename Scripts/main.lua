@@ -13,6 +13,7 @@ local ManufacturingTags = require("ManufacturingTags")
 local CraftingRecipe = require("CraftingRecipe")
 local VendorData = require("VendorData")
 local WeaponsDetailsData = require("WeaponsDetailsData")
+local WeaponPartStatsData = require("WeaponPartStatsData")
 
 
 -- NOTE Required to parse RecipyCraftTime of ManufactoringRecipies
@@ -36,6 +37,7 @@ local ManufacturingTagsHandler = {}
 local ValueHandlers = {}
 local VendorDataHandler = {}
 local WeaponsDetailsDataHandler = {}
+local WeaponPartStatsDataHandler = {}
 
 local DataCollections = {
     Item = {},
@@ -44,6 +46,7 @@ local DataCollections = {
     CraftingGroup = {},
     VendorData = {},
     WeaponsDetailsData = {},
+    WeaponPartStatsData = {},
 }
 
 local function FindOrCreateModDir()
@@ -226,6 +229,10 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
         ExecuteAsync(function() WeaponsDetailsDataHandler:DumpDataTable() end)
     end
 
+    if IsDataTableValid(WeaponPartStatsDataHandler.__table) then
+        ExecuteAsync(function() WeaponPartStatsDataHandler:DumpDataTable() end)
+    end
+
     return true
 end)
 
@@ -274,6 +281,11 @@ ExecuteInGameThread(function()
         ManufacturingGroupsHandler = ManufacturingGroups.new(dataTable)
     end
 
+    local dataTable = StaticFindObject(Settings.DataTableClassNames.WeaponPartStatsData)
+    if IsDataTableValid(dataTable) then
+        WeaponPartStatsDataHandler = WeaponPartStatsData.new(dataTable)
+    end
+
     for _, path in ipairs(Settings.ValueTables) do
         local dataTable = StaticFindObject(path)
         if dataTable and dataTable:IsValid() then
@@ -303,6 +315,29 @@ ExecuteInGameThread(function()
     for _, itemData in ipairs(DataCollections.Item.Modify) do
         ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
     end
+
+    -- WeaponPartStatsData
+    ExecuteWithDelay(100, function()
+        for _, weaponPartStats in ipairs(DataCollections.WeaponPartStatsData.Add) do
+            WeaponPartStatsDataHandler:AddRow(weaponPartStats["Name"], weaponPartStats["Data"])
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, weaponPartStats in ipairs(DataCollections.WeaponPartStatsData.Modify) do
+            WeaponPartStatsDataHandler:ModifyRow(weaponPartStats["Name"], weaponPartStats["Data"])
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, weaponPartStats in ipairs(DataCollections.WeaponPartStatsData.Remove) do
+            WeaponPartStatsDataHandler:RemoveRow(weaponPartStats["Name"])
+        end
+    end)
+
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs(DataCollections.WeaponsDetailsData.Add) do
+            WeaponsDetailsDataHandler:AddRow(weaponDetails["Name"], weaponDetails["Data"])
+        end
+    end)
 
     -- NOTE: Not sure if this is the right place to do here. As it requires knowledge about the datas shape.
     -- Which should probably be encapsulated in the corresponding module.
