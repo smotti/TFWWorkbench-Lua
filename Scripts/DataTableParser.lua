@@ -42,7 +42,14 @@ local function ToJson(value, kismetLib)
         local str = tostring(value)
         Log(string.format("userdata type: %s\n", str), "ToJson")
 
-        if str:match("TSoftObjectPtr") then
+        if str:match("TSoftClassPtr") then
+            local success, result = pcall(function()
+                return kismetLib:Conv_SoftClassReferenceToString(value)
+            end)
+            if success then
+                Log(string.format("TSoftClassPtr: %s\n", result:ToString()), "ToJson")
+            end
+        elseif str:match("TSoftObjectPtr") then
             local success, result = pcall(function()
                 return kismetLib:Conv_SoftObjectReferenceToString(value)
             end)
