@@ -14,7 +14,8 @@ Settings.DataTableClassNames = {
     ManufacturingRecipes = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringRecipies.DT_ManufactoringRecipies",
     ManufacturingTags = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringTags.DT_ManufactoringTags",
     TagToRowHandle = "/Game/Blueprints/Data/DataReference/DT_TagToRowHandle.DT_TagToRowHandle",
-    VendorData = "/Game/Blueprints/Data/VendorDataTable.VendorDataTable"
+    VendorData = "/Game/Blueprints/Data/VendorDataTable.VendorDataTable",
+    WeaponsDetailsData = "/Game/Blueprints/Data/WeaponsDetailsData.WeaponsDetailsData",
 }
 Settings.ValueTables = {
     "/Game/Blueprints/Data/Value/LEGACY_ItemValueOverrideData.LEGACY_ItemValueOverrideData",
@@ -46,6 +47,10 @@ Settings.DataTables = {
     VendorData = {
         Path = "/Game/Blueprints/Data/VendorDataTable.VendorDataTable",
         SourceRow = "WesternWeaponVendor"
+    },
+    WeaponsDetailsData = {
+        Path = "/Game/Blueprints/Data/WeaponsDetailsData.WeaponsDetailsData",
+        SourceRow = "RFL01A_Surplus"
     }
 }
 

@@ -12,6 +12,7 @@ local ManufacturingRecipes = require("ManufacturingRecipes")
 local ManufacturingTags = require("ManufacturingTags")
 local CraftingRecipe = require("CraftingRecipe")
 local VendorData = require("VendorData")
+local WeaponsDetailsData = require("WeaponsDetailsData")
 
 
 -- NOTE Required to parse RecipyCraftTime of ManufactoringRecipies
@@ -34,6 +35,7 @@ local ManufacturingRecipesHandler = {}
 local ManufacturingTagsHandler = {}
 local ValueHandlers = {}
 local VendorDataHandler = {}
+local WeaponsDetailsDataHandler = {}
 
 local DataCollections = {
     Item = {},
@@ -41,6 +43,7 @@ local DataCollections = {
     CraftingRecipe = {},
     CraftingGroup = {},
     VendorData = {},
+    WeaponsDetailsData = {},
 }
 
 local function FindOrCreateModDir()
@@ -219,6 +222,10 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
         ExecuteAsync(function() VendorDataHandler:DumpDataTable() end)
     end
 
+    if IsDataTableValid(WeaponsDetailsDataHandler.__table) then
+        ExecuteAsync(function() WeaponsDetailsDataHandler:DumpDataTable() end)
+    end
+
     return true
 end)
 
@@ -235,6 +242,8 @@ ExecuteInGameThread(function()
     InitDataTables()
 
     -- Initialize data table handlers
+    -- TODO: Refactor to remove duplication. Use the same approach, as for the ValueHandlers, for
+    -- the other handlers as well.
     ItemDetailsData = StaticFindObject(Settings.DataTableClassNames.ItemDetailsData)
     if IsDataTableValid(ItemDetailsData) then
         ItemDetailsDataHandler.Init(ItemDetailsData)
@@ -276,6 +285,11 @@ ExecuteInGameThread(function()
     local dataTable = StaticFindObject(Settings.DataTableClassNames.VendorData)
     if IsDataTableValid(dataTable) then
         VendorDataHandler = VendorData.new(dataTable)
+    end
+
+    local dataTable = StaticFindObject(Settings.DataTableClassNames.WeaponsDetailsData)
+    if IsDataTableValid(dataTable) then
+        WeaponsDetailsDataHandler = WeaponsDetailsData.new(dataTable)
     end
 
     -- NOTE: These Add/Modify/Remove function calls could potentially also be called asynchronously
