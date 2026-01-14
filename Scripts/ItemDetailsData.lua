@@ -183,19 +183,26 @@ local function AddRow(name, data)
     ---@class FInventoryItemDetails
     local rowData = {
         Category = data["Category"],
+        ItemName = data["ItemName"],
+        ItemDescription = data["ItemDescription"],
         ItemMesh = data["ItemMesh"],
         ItemMeshTransform = data["ItemMeshTransform"],
+        ExtraMeshs = {},
+        ExtraMeshTransform = {},
         ItemLootRadius = data["ItemLootRadius"],
         ItemIconRadius = data["ItemIconRadius"],
         ItemIcon = data["ItemIcon"],
         ItemType = EItemCategory[data["ItemType"]],
         ItemSubtype = data["ItemSubtype"],
+        ExtraDetailsRowName = "None",
         LootSound = data["LootSound"],
         DropSound = data["DropSound"],
         ItemSize = data["ItemSize"],
         Volume = data["Volume"],
         Weight = data["Weight"],
         ValueRow = data["ValueRow"],
+        Value = 0,
+        WaterValue = 0,
         DropOnDeath = data["DropOnDeath"],
         MaxStack = data["MaxStack"],
         ExtraTagData = data["ExtraTagData"],
@@ -231,7 +238,7 @@ local function ModifyRow(name, data)
         end
     end
 
-    Log(string.format("Modifed row %s by calling AddRow\n", name), "ModifyRow")
+    Log(string.format("Modified row %s by calling AddRow\n", name), "ModifyRow")
     AddRow(name, parsedRow)
 end
 
