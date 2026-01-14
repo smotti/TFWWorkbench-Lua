@@ -146,6 +146,7 @@ local function LoadDataTableAssets()
         return
     end
 
+    -- Table of DataTables that need to be loaded at the beginning of the game
     local assetData = {
         ManufacturingGroups = {
             ["PackageName"] = UEHelpers.FindOrAddFName("/Game/FW/UI/Manufactoring/Data/DT_ManufactoringGroups"),
@@ -192,21 +193,22 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
 
     outputDevice:Log("Dumping data tables")
     --NOTE: Using async calls here to don't lock up the game thread
+    --TODO: Refactor these calls. Similar to how it's being done for the ValueHandlers
     if IsDataTableValid(ItemDetailsData) then
-        --ExecuteAsync(function() ItemDetailsDataHandler.DumpDataTable() end)
+        ExecuteAsync(function() ItemDetailsDataHandler.DumpDataTable() end)
     end
 
     if IsDataTableValid(ItemTags) then
-        --ExecuteAsync(function() ItemTagsHandler.DumpDataTable() end)
+        ExecuteAsync(function() ItemTagsHandler.DumpDataTable() end)
     end
 
     if IsDataTableValid(TagToRowHandle) then
-        --ExecuteAsync(function() TagToRowHandleHandler.DumpDataTable() end)
+        ExecuteAsync(function() TagToRowHandleHandler.DumpDataTable() end)
     end
 
     for _, handler in pairs(ValueHandlers) do
         if IsDataTableValid(handler.__table) then
-            --ExecuteAsync(function() handler:DumpDataTable() end)
+            ExecuteAsync(function() handler:DumpDataTable() end)
         end
     end
 
@@ -220,6 +222,7 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
 
     if IsDataTableValid(ManufacturingGroupsHandler.__table) then
         ExecuteAsync(function() ManufacturingGroupsHandler:DumpDataTable() end)
+    end
 
     if IsDataTableValid(VendorDataHandler.__table) then
         ExecuteAsync(function() VendorDataHandler:DumpDataTable() end)
@@ -308,13 +311,21 @@ ExecuteInGameThread(function()
     -- if there are ever any "performance" concerns. Though it's more a user experience thing.
     -- As a large amount of items could cause the game thread to be locked up. Meaning the game would
     -- take a bit longer to load into the main menu.
+
+    -- InventoryItemDetailsData
     ExecuteWithDelay(100, function()
         Items.AddItems(DataCollections.Item.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
     end)
 
-    for _, itemData in ipairs(DataCollections.Item.Modify) do
-        ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
-    end
+    ExecuteWithDelay(100, function()
+        for _, itemData in ipairs(DataCollections.Item.Modify) do
+            ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
+        end
+    end)
+
+    ExecuteWithDelay(100, function()
+        Items.RemoveItems(DataCollections.Item.Remove, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+    end)
 
     -- WeaponPartStatsData
     ExecuteWithDelay(100, function()
@@ -333,32 +344,57 @@ ExecuteInGameThread(function()
         end
     end)
 
+    -- WeaponsDetailsData
     ExecuteWithDelay(100, function()
         for _, weaponDetails in ipairs(DataCollections.WeaponsDetailsData.Add) do
             WeaponsDetailsDataHandler:AddRow(weaponDetails["Name"], weaponDetails["Data"])
         end
     end)
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs(DataCollections.WeaponsDetailsData.Modify) do
+            WeaponsDetailsDataHandler:ModifyRow(weaponDetails["Name"], weaponDetails["Data"])
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs(DataCollections.WeaponsDetailsData.Remove) do
+            WeaponsDetailsDataHandler:RemoveRow(weaponDetails["Name"])
+        end
+    end)
 
-    -- NOTE: Not sure if this is the right place to do here. As it requires knowledge about the datas shape.
-    -- Which should probably be encapsulated in the corresponding module.
-    for action, collection in pairs(dataCollections.ItemValue) do
-        for _, element in ipairs(collection) do
-            local dataTableName = Utils.GetDataTableName(element["Data"]["DataTable"])
-            if dataTableName then
-                local handler = ValueHandlers[dataTableName]
-                if action == "Add" then
-                    handler:AddRow(element["Name"], element["Data"])
-                elseif action == "Modify" then
-                    handler:ModifyRow(element["Name"], element["Data"])
-                elseif action == "Remove" then
-                    handler:RemoveRow(element["Name"])
-                end
+    -- ValueData
+    ExecuteWithDelay(100, function()
+        for _, valueData in ipairs(DataCollections.ItemValue.Add) do
+            local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
+            local handler = ValueHandlers[dataTableName]
+            if handler then
+                handler:AddRow(valueData["Name"], valueData["Data"])
             end
         end
-    end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, valueData in ipairs(DataCollections.ItemValue.Modify) do
+            local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
+            local handler = ValueHandlers[dataTableName]
+            if handler then
+                handler:ModifyRow(valueData["Name"], valueData["Data"])
+            end
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, valueData in ipairs(DataCollections.ItemValue.Remove) do
+            local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
+            local handler = ValueHandlers[dataTableName]
+            if handler then
+                handler:RemoveRow(valueData["Name"])
+            end
+        end
+    end)
+
     -- ManufacturingRecipes
     ExecuteWithDelay(100, function()
-        CraftingRecipe.AddRecipes(DataCollections.CraftingRecipe.Add, ManufacturingRecipesHandler,
+        CraftingRecipe.AddRecipes(
+            DataCollections.CraftingRecipe.Add,
+            ManufacturingRecipesHandler,
             ManufacturingTagsHandler)
     end)
     ExecuteWithDelay(100, function()
@@ -380,7 +416,15 @@ ExecuteInGameThread(function()
         end
     end)
 
+    ExecuteWithDelay(100, function()
+        for _, group in ipairs(DataCollections.CraftingGroup.Remove) do
+            ManufacturingGroupsHandler:RemoveRow(group["Name"])
+        end
+    end)
+
     -- VendorData
+    --NOTE: Adding does work as well but doesn't make any sense yet. Once support for
+    -- VendorDetailsDatatable was added it makes sense to call AddRow for VendorData as well.
     ExecuteWithDelay(100, function()
         for _, vendorData in ipairs(DataCollections.VendorData.Modify) do
             VendorDataHandler:ModifyRow(vendorData["Name"], vendorData["Data"])
