@@ -5,6 +5,26 @@ local function Log(message, funcName)
     Utils.Log(message, "DataTableParser", funcName)
 end
 
+local TacCamColours = {
+    Default = 0,
+    Green = 1,
+    Red = 2,
+    Yellow = 3,
+    TacCamColours_MAX = 4
+}
+
+local function ToJsonTacCamHighlight(tacCamColor)
+    local colors = {
+        [0] = "Default",
+        [1] = "Green",
+        [2] = "Red",
+        [3] = "Yellow",
+        [4] = "TacCamColours_Max"
+    }
+    Log(string.format("TacCamHighlight: %s - %d\n", colors[tacCamColor], tacCamColor), "ToJsonTacCamHighlight")
+    return colors[tacCamColor]
+end
+
 local function ToJson(value, kismetLib)
     -- That needs to be refactored, because this ToJson function will be pulled out into
     -- a dedicated modules for common parsing functionality
@@ -68,5 +88,7 @@ local function ToJson(value, kismetLib)
 end
 
 return {
-    ToJson = ToJson
+    TacCamColours = TacCamColours,
+    ToJson = ToJson,
+    ToJsonTacCamHighlight = ToJsonTacCamHighlight
 }

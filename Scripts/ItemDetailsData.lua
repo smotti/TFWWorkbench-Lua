@@ -2,7 +2,6 @@ local json = require("json")
 local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 local DataTableParser = require("DataTableParser")
-local Settings = require("Settings")
 
 
 local DataTable = {}
@@ -15,14 +14,6 @@ local EItemCategory = {
     General = 4,
     Dangle = 5,
     EItemCategory_MAX = 6,
-}
-
-local TacCamColours = {
-    Default = 0,
-    Green = 1,
-    Red = 2,
-    Yellow = 3,
-    TacCamColours_MAX = 4
 }
 
 local function Log(message, funcName)
@@ -115,18 +106,6 @@ local function ToJsonEItemCategory(itemCategory)
     return categories[itemCategory]
 end
 
-local function ToJsonTacCamHighlight(tacCamColor)
-    local colors = {
-        [0] = "Default",
-        [1] = "Green",
-        [2] = "Red",
-        [3] = "Yellow",
-        [4] = "TacCamColours_Max"
-    }
-    Log(string.format("TacCamHighlight: %s - %d\n", colors[tacCamColor], tacCamColor), "ToJsonTacCamHighlight")
-    return colors[tacCamColor]
-end
-
 ---@param data FInventoryItemDetails
 local function ParseFInventorItemDetails(data)
     if not data then
@@ -164,7 +143,7 @@ local function ParseFInventorItemDetails(data)
         StartingStack = DataTableParser.ToJson(data.StartingStack, kismetLib),
         ConsumableAbility = DataTableParser.ToJson(data.ConsumableAbility, kismetLib),
         BattlepointsRowHandle = DataTableParser.ToJson(data.BattlepointsRowHandle, kismetLib),
-        TacCamHighlight = ToJsonTacCamHighlight(data.TacCamHighlight),
+        TacCamHighlight = DataTableParser.ToJsonTacCamHighlight(data.TacCamHighlight),
         RareLootCategory = DataTableParser.ToJson(data.RareLootCategory, kismetLib),
         RareLootLocations = DataTableParser.ToJson(data.RareLootLocations, kismetLib)
     }
@@ -179,7 +158,7 @@ local function DumpDataTable()
     local item = dataTable:FindRow("FirstAid")
     output["FirstAid"] = ParseFInventorItemDetails(item)
     output["TestItem"] = ParseFInventorItemDetails(dataTable:FindRow("TestItem"))
-    output["TestItem2"] = ParseFInventorItemDetails(dataTable:FindRow("TestItem2"))
+    --output["TestItem2"] = ParseFInventorItemDetails(dataTable:FindRow("TestItem2"))
     --    dataTable:ForEachRow(function(rowName, rowData)
     --        ---@cast rowName string
     --        ---@cast rowData FInventoryItemDetails
@@ -223,7 +202,7 @@ local function AddRow(name, data)
         StartingStack = data["StartingStack"],
         ConsumableAbility = data["ConsumableAbility"],
         BattlepointsRowHandle = data["BattlepointsRowHandle"],
-        TacCamHighlight = TacCamColours[data["TacCamHighlight"]],
+        TacCamHighlight = DataTableParser.TacCamColours[data["TacCamHighlight"]],
         RareLootCategory = data["RareLootCategory"],
         RareLootLocations = data["RareLootLocations"]
     }
@@ -246,7 +225,7 @@ local function ModifyRow(name, data)
         if field == "ItemType" then
             parsedRow[field] = EItemCategory[value]
         elseif field == "TacCamHighlight" then
-            parsedRow[field] = TacCamColours[value]
+            parsedRow[field] = DataTableParser.TacCamColours[value]
         else
             parsedRow[field] = value
         end
