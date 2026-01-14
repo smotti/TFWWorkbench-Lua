@@ -1,0 +1,46 @@
+[
+    {
+        "Action": "Add",
+        "Name": "TestRecipe",
+        "Data": {
+            "RecipyName": "Test Recipe",
+            "CreatedItems": [
+                {
+                    "ItemTag": {
+                        "TagName": "Inventory.Item.TestItem"
+                    },
+                    "Quantity": 1
+                }
+            ],
+            "RecipyGroupTag": {
+                "TagName": "Recipe.Ammo"
+            },
+            "RecipyCraftTime": 15000000,
+            "RequiredTags": {
+                "ParentTags": [],
+                "GameplayTags": []
+            },
+            "RecipyTag": {
+                "TagName": "Recipe.Inventory.Item.TestItem"
+            },
+            "UsedComponents": [
+                {
+                    "ItemTag": {
+                        "TagName": "Inventory.Item.Item.Ammo.545"
+                    },
+                    "Quantity": 1
+                },
+                {
+                    "ItemTag": {
+                        "TagName": "Inventory.Item.Tobacco01"
+                    },
+                    "Quantity": 1
+                }
+            ]
+        }
+    },
+    {
+        "Action": "Remove",
+        "Name": "PST02Repair"
+    }
+]

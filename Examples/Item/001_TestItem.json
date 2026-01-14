@@ -1,0 +1,84 @@
+[
+    {
+        "Action": "Add",
+        "Name": "TestItem",
+        "Data": {
+            "RareLootCategory": "",
+            "Category": "Consumable",
+            "ExtraTagData": {
+                "TagName": "None"
+            },
+            "ItemLootRadius": 200,
+            "ItemIconRadius": 500,
+            "ValueRow": {
+                "RowName": "TestItem",
+                "DataTable": "/Game/Blueprints/Data/Value/LEGACY_ItemValueOverrideData.LEGACY_ItemValueOverrideData"
+            },
+            "RareLootLocations": "",
+            "ItemType": "MedicalSupplies",
+            "ItemIcon": "/Game/ArtAssets/UI/Inventory/Textures/ItemPortraits/ItemPortrait_GDC_CerealBox_mre.ItemPortrait_GDC_CerealBox_mre",
+            "TacCamHighlight": "Default",
+            "MaxStack": 2,
+            "ItemMeshTransform": {
+                "Translation": {
+                    "X": 1,
+                    "Y": 0,
+                    "Z": 0
+                },
+                "Scale3D": {
+                    "X": 2,
+                    "Y": 2,
+                    "Z": 2
+                },
+                "Rotation": {
+                    "X": 1,
+                    "Y": 0,
+                    "Z": 0,
+                    "W": 1
+                }
+            },
+            "DropSound": "",
+            "ItemSize": {
+                "X": 3,
+                "Y": 3,
+                "Z": 3
+            },
+            "BattlepointsRowHandle": {
+                "RowName": "HealthKit",
+                "DataTable": "/Game/BattlePointSystem/DataTables/DT_InventoryItemBattlePoint.DT_InventoryItemBattlePoint"
+            },
+            "ItemDescription": "Test Description",
+            "StartingStack": 1,
+            "Weight": 0.6,
+            "DropOnDeath": true,
+            "LootSound": "",
+            "Volume": 8,
+            "ItemName": "Test Item",
+            "ItemMesh": "/Game/AssetPacksStore/Military_VOL8_Supplies/Meshes/SM_Meal_01a.SM_Meal_01a",
+            "ConsumableAbility": "/Game/FW/Player/GameplayAbilities/GA_Player_MedKit.GA_Player_MedKit_C",
+            "ExtraDetailsRowName": "None",
+            "ItemSubtype": {
+                "GameplayTags": [
+                    {
+                        "TagName": "Item.Healing"
+                    },
+                    {
+                        "TagName": "Item.Consumable"
+                    }
+                ],
+                "ParentTags": [
+                    {
+                        "TagName": "Item"
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "Action": "Modify",
+        "Name": "TestItem",
+        "Data": {
+            "Category": "Test"
+        }
+    }
+]

@@ -1,0 +1,106 @@
+[
+    {
+        "Action": "Add",
+        "Name": "TestWeapon",
+        "Data": {
+            "ExtraTooltip": "A test weapon",
+            "DataAsset": "/Game/FW/Weapons/Weapon_V2/RFL_Rifles/RFL01A/DA_WPN_RFL01a_v2.DA_WPN_RFL01a_v2",
+            "ValueRowName": "WPN_000",
+            "DanglyClass": "/Game/FW/Weapons/Weapon_V2/RFL_Rifles/RFL01A/BP_WPN_RFL01a.BP_WPN_RFL01a_C",
+            "LevelPartUnlockTable": "/Game/FW/Weapons/Weapon_V2/RFL_Rifles/RFL01A/DT_RFL01a_WeaponPartUnlocks.DT_RFL01a_WeaponPartUnlocks",
+            "MustBeLoose": false,
+            "DanglyDescription": "Test weapon that uses 5.45mm",
+            "DanglyName": "Test weapon",
+            "CanBeLoose": false,
+            "Icon": "/Game/ArtAssets/UI/Inventory/Textures/WeaponPortraits/WeaponPortraitsBaked/T_RFL01A.T_RFL01A",
+            "HUDIcon": "/Game/ArtAssets/UI/Inventory/Textures/WeaponPortraits/WeaponPortraitsBaked/T_HUDRFL01A_Surplus.T_HUDRFL01A_Surplus",
+            "DanglyTypeTag": {
+                "GameplayTags": [
+                    {
+                        "TagName": "Item.Weapon"
+                    },
+                    {
+                        "TagName": "Item.WeaponAndParts"
+                    },
+                    {
+                        "TagName": "Item.Rifle"
+                    }
+                ],
+                "ParentTags": [
+                    {
+                        "TagName": "Item"
+                    }
+                ]
+            },
+            "RequiredGameplayTags": {
+                "GameplayTags": [
+                    {
+                        "TagName": "PlayerSkill.Global.RFL.AllowUse"
+                    }
+                ],
+                "ParentTags": [
+                    {
+                        "TagName": "PlayerSkill.Global.RFL"
+                    },
+                    {
+                        "TagName": "PlayerSkill.Global"
+                    },
+                    {
+                        "TagName": "PlayerSkill"
+                    }
+                ]
+            },
+            "AllowTags": {
+                "GameplayTags": [
+                    {
+                        "TagName": "Pawn.Player.Shaman"
+                    },
+                    {
+                        "TagName": "Pawn.Player.MaskMan"
+                    },
+                    {
+                        "TagName": "Pawn.Player.Gunhead"
+                    },
+                    {
+                        "TagName": "Pawn.Player.Girl"
+                    },
+                    {
+                        "TagName": "Pawn.Player.BagMan"
+                    },
+                    {
+                        "TagName": "Pawn.Player.OldMan"
+                    }
+                ],
+                "ParentTags": [
+                    {
+                        "TagName": "Pawn.Player"
+                    },
+                    {
+                        "TagName": "Pawn"
+                    }
+                ]
+            },
+            "TacCamHighlight": "Default",
+            "LevelScopeTag": {
+                "TagName": "Scope.Weapon.RFL01A"
+            },
+            "AttachRelativeToRig": false,
+            "ValueRow": {
+                "RowName": "WPN_000",
+                "DataTable": "/Game/Blueprints/Data/Value/LEGACY_ItemValueOverrideData.LEGACY_ItemValueOverrideData"
+            },
+            "Weight": 0
+        }
+    },
+    {
+        "Action": "Modify",
+        "Name": "TestWeapon",
+        "Data": {
+            "ExtraTooltip": "Hello there!"
+        }
+    },
+    {
+        "Action": "Remove",
+        "Name": "RFL29"
+    }
+]

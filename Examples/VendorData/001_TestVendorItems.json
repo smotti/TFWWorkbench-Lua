@@ -1,0 +1,35 @@
+[
+
+    {
+        "Action": "Modify",
+        "Name": "WesternWeaponVendor",
+        "Data": {
+            "MapedItemsSold": {
+                "TestItem": {
+                    "VendorLevel": 0,
+                    "Quantity": 5,
+                    "ItemRowHandle": {
+                        "DataTable": "/Game/Blueprints/Data/ItemDetailsData.ItemDetailsData",
+                        "RowName": "TestItem"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Action": "Modify",
+        "Name": "WesternWeaponVendor",
+        "Data": {
+            "MapedWeaponsSold": {
+                "TestWeapon": {
+                    "VendorLevel": 0,
+                    "Quantity": 10,
+                    "ItemRowHandle": {
+                        "DataTable": "/Game/Blueprints/Data/WeaponsDetailsData.WeaponsDetailsData",
+                        "RowName": "TestWeapon"
+                    }
+                }
+            }
+        }
+    }
+]

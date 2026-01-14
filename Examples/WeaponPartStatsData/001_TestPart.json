@@ -1,0 +1,37 @@
+[
+    {
+        "Action": "Add",
+        "Name": "TestPart",
+        "Data": {
+        "ADSSpeed": 0,
+        "SightPartName": "",
+        "RecoilWristRelBuff": -0.15000000596046,
+        "RecoilArmRelBuff": -0.066249996423721,
+        "MagazineCapacity": 0,
+        "IsSight": false,
+        "SuppressorVallue": 1,
+        "IsSuppressed": false,
+        "Accuracy": 0.14499999582767,
+        "StabilizeTimeRelBuff": -0.082968160510063,
+        "StabilizeScalarRelBuff": -0.10593750327826,
+        "IsScoped": false,
+        "Damage": 0,
+        "RCVAsSkelMesh": false,
+        "FOV": 0,
+        "ReloadSpeed": 0,
+        "FireRate": 0,
+        "Stability": 0.125
+        }
+    },
+    {
+        "Action": "Modify",
+        "Name": "TestPart",
+        "Data": {
+            "MagazineCapacity": 100
+        }
+    },
+    {
+        "Action": "Remove",
+        "Name": "WPN_RFL12_HGD_12"
+    }
+]
