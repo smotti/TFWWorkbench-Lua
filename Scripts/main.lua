@@ -242,7 +242,7 @@ end)
 ExecuteInGameThread(function()
     -- Create mod dir if not present and collect data from mod dirs
     local modDir = FindOrCreateModDir()
-    for dirName, dir in pairs(modDir) do
+    for dirName, dir in pairs(modDir.DataTable or {}) do
         if not (dirName == "Dumps") then
             DataCollections[dirName] = CollectData(dir)
         end
