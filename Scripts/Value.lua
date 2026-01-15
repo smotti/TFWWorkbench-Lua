@@ -47,20 +47,4 @@ function Value:AddRow(name, data)
     Log(string.format("Added row %s\n", name), "AddRow")
 end
 
-function Value:ModifyRow(name, data)
-    local oldData = self.__table:FindRow(name)
-    if not oldData then
-        Log(string.format("Failed to find value %s\n", name), "ModifyRow")
-        return
-    end
-
-    local newData = self:ParseRowData(oldData)
-    for k, v in pairs(data) do
-        newData[k] = v
-    end
-
-    self:AddRow(name, newData)
-    Log(string.format("Modifed row %s\n", name), "ModifyRow")
-end
-
 return Value

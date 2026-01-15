@@ -60,8 +60,6 @@ local function Init(dataTable)
         DataTable.__dumpFile = string.format("%s/Dumps/DT_ItemTags.json", modDirs.__absolute_path)
         Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "Init")
     end
-
-    RegisterTests()
 end
 
 ---Parse FGameplayTagTableRow to table that can be json encoded.

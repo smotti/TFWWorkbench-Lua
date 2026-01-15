@@ -20,39 +20,6 @@ local function Log(message, funcName)
     Utils.Log(message, "ItemDetailsData", funcName)
 end
 
-local function RegisterTests()
-    RegisterConsoleCommandHandler("TestItemDetailsDataHandler", function(fullCmd, params, outputDevice)
-        Log(string.format("Handle console command: %s\n", fullCmd), "TestItemDetailsDataHandler")
-
-        local itemId = "TestItem"
-        local testData = {
-            Category = "Test"
-        }
-
-        DataTable.ModifyRow(itemId, testData)
-        local row = DataTable.__table:FindRow(itemId)
-        if row then
-            if row.Category:ToString() == testData.Category then
-                outputDevice:Log("[x] Test ModifyRow\n")
-            else
-                outputDevice:Log("[-] Test ModifyRow\n")
-            end
-        else
-            outputDevice:Log("[-] Test ModifyRow\n")
-        end
-
-        DataTable.RemoveRow(itemId)
-        local row = DataTable.__table:FindRow(itemId)
-        if not row then
-            outputDevice:Log("[x] Test RemoveRow\n")
-        else
-            outputDevice:Log("[-] Test RemoveRow\n")
-        end
-
-        return true
-    end)
-end
-
 local function Init(dataTable)
     DataTable.__table = dataTable
     DataTable.__name = "ItemDetailsData"
@@ -67,8 +34,6 @@ local function Init(dataTable)
         DataTable.__dumpFile = string.format("%s/Dumps/ItemDetailsData.json", modDirs.__absolute_path)
         Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "InitHandler")
     end
-
-    RegisterTests()
 end
 
 local function ToJsonItemMeshTransform(itemMeshTransform)
@@ -215,10 +180,10 @@ local function AddRow(name, data)
     Log(string.format("Added row %s\n", name), "AddRow")
 end
 
-local function ModifyRow(name, data)
+local function ReplaceRow(name, data)
     local row = DataTable.__table:FindRow(name)
     if not row then
-        Log(string.format("Row with name %s not found\n", name), "ModifyRow")
+        Log(string.format("Row with name %s not found\n", name), "ReplaceRow")
         return
     end
 
@@ -233,7 +198,7 @@ local function ModifyRow(name, data)
         end
     end
 
-    Log(string.format("Modified row %s by calling AddRow\n", name), "ModifyRow")
+    Log(string.format("Replaced row %s by calling AddRow\n", name), "ReplaceRow")
     AddRow(name, parsedRow)
 end
 
@@ -246,7 +211,7 @@ end
 DataTable.Init = Init
 DataTable.DumpDataTable = DumpDataTable
 DataTable.AddRow = AddRow
-DataTable.ModifyRow = ModifyRow
+DataTable.ReplaceRow = ReplaceRow
 DataTable.RemoveRow = RemoveRow
 
 return DataTable

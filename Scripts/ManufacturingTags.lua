@@ -37,9 +37,9 @@ function ManufacturingTags:AddRow(name, data)
     Log(string.format("Added row %s\n", name), "AddRow")
 end
 
-function ManufacturingTags:ModifyRow(name, data)
+function ManufacturingTags:ReplaceRow(name, data)
     self:AddRow(name, data)
-    Log(string.format("Modified row %s\n", name), "ModifyRow")
+    Log(string.format("Replaced row %s\n", name), "ReplaceRow")
 end
 
 return ManufacturingTags

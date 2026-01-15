@@ -64,7 +64,7 @@ function DataTable:AddRow(name, data)
     Log("Function not implemented", "AddRow")
 end
 
-function DataTable:ModifyRow(name, data)
+function DataTable:ReplaceRow(name, data)
     local row = self.__table:FindRow(name)
     if not row then
         Log(string.format("Failed to find row %s\n", name), "ModifyRow")
@@ -77,7 +77,7 @@ function DataTable:ModifyRow(name, data)
     end
 
     self:AddRow(name, parsedRow)
-    Log(string.format("Modified row %s\n", name), "ModifyRow")
+    Log(string.format("Replaced row %s\n", name), "ReplaceRow")
 end
 
 function DataTable:RemoveRow(name)

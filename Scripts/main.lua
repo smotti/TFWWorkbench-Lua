@@ -77,7 +77,7 @@ local function CollectData(dir)
 
     local collection = {
         Add = {},
-        Modify = {},
+        Replace = {},
         Remove = {}
     }
 
@@ -100,11 +100,11 @@ local function CollectData(dir)
                             "main",
                             "CollectData")
                         table.insert(collection.Add, { Name = element["Name"], Data = element["Data"] })
-                    elseif element["Action"] == "Modify" then
+                    elseif element["Action"] == "Replace" then
                         Utils.Log(
-                            string.format("Modify %s - Name: %s\tFile: %s\n", dir.__name, element["Name"], file.__name),
+                            string.format("Replace %s - Name: %s\tFile: %s\n", dir.__name, element["Name"], file.__name),
                             "main", "CollectData")
-                        table.insert(collection.Modify, { Name = element["Name"], Data = element["Data"] })
+                        table.insert(collection.Replace, { Name = element["Name"], Data = element["Data"] })
                     elseif element["Action"] == "Remove" then
                         Utils.Log(
                             string.format("Remove %s - Item: %s\tFile: %s\n", dir.__name, element["Name"], file.__name),
@@ -307,7 +307,7 @@ ExecuteInGameThread(function()
         WeaponsDetailsDataHandler = WeaponsDetailsData.new(dataTable)
     end
 
-    -- NOTE: These Add/Modify/Remove function calls could potentially also be called asynchronously
+    -- NOTE: These Add/Replace/Remove function calls could potentially also be called asynchronously
     -- if there are ever any "performance" concerns. Though it's more a user experience thing.
     -- As a large amount of items could cause the game thread to be locked up. Meaning the game would
     -- take a bit longer to load into the main menu.
@@ -318,8 +318,8 @@ ExecuteInGameThread(function()
     end)
 
     ExecuteWithDelay(100, function()
-        for _, itemData in ipairs((DataCollections.Item or {}).Modify or {}) do
-            ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
+        for _, itemData in ipairs((DataCollections.Item or {}).Replace or {}) do
+            ItemDetailsDataHandler.ReplaceRow(itemData["Name"], itemData["Data"])
         end
     end)
 
@@ -334,8 +334,8 @@ ExecuteInGameThread(function()
         end
     end)
     ExecuteWithDelay(100, function()
-        for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Modify or {}) do
-            WeaponPartStatsDataHandler:ModifyRow(weaponPartStats["Name"], weaponPartStats["Data"])
+        for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Replace or {}) do
+            WeaponPartStatsDataHandler:ReplaceRow(weaponPartStats["Name"], weaponPartStats["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
@@ -351,8 +351,8 @@ ExecuteInGameThread(function()
         end
     end)
     ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Modify or {}) do
-            WeaponsDetailsDataHandler:ModifyRow(weaponDetails["Name"], weaponDetails["Data"])
+        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Replace or {}) do
+            WeaponsDetailsDataHandler:ReplaceRow(weaponDetails["Name"], weaponDetails["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
@@ -372,11 +372,11 @@ ExecuteInGameThread(function()
         end
     end)
     ExecuteWithDelay(100, function()
-        for _, valueData in ipairs((DataCollections.ItemValue or {}).Modify or {}) do
+        for _, valueData in ipairs((DataCollections.ItemValue or {}).Replace or {}) do
             local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
             local handler = ValueHandlers[dataTableName]
             if handler then
-                handler:ModifyRow(valueData["Name"], valueData["Data"])
+                handler:ReplaceRow(valueData["Name"], valueData["Data"])
             end
         end
     end)
@@ -398,8 +398,8 @@ ExecuteInGameThread(function()
             ManufacturingTagsHandler)
     end)
     ExecuteWithDelay(100, function()
-        for _, element in ipairs((DataCollections.CraftingRecipe or {}).Modify or {}) do
-            ManufacturingRecipesHandler:ModifyRow(element["Name"], element["Data"])
+        for _, element in ipairs((DataCollections.CraftingRecipe or {}).Replace or {}) do
+            ManufacturingRecipesHandler:ReplaceRow(element["Name"], element["Data"])
         end
     end)
 
@@ -411,8 +411,8 @@ ExecuteInGameThread(function()
     end)
 
     ExecuteWithDelay(100, function()
-        for _, group in ipairs((DataCollections.CraftingGroup or {}).Modify or {}) do
-            ManufacturingGroupsHandler:ModifyRow(group["Name"], group["Data"])
+        for _, group in ipairs((DataCollections.CraftingGroup or {}).Replace or {}) do
+            ManufacturingGroupsHandler:ReplaceRow(group["Name"], group["Data"])
         end
     end)
 
@@ -426,8 +426,8 @@ ExecuteInGameThread(function()
     --NOTE: Adding does work as well but doesn't make any sense yet. Once support for
     -- VendorDetailsDatatable was added it makes sense to call AddRow for VendorData as well.
     ExecuteWithDelay(100, function()
-        for _, vendorData in ipairs((DataCollections.VendorData or {}).Modify or {}) do
-            VendorDataHandler:ModifyRow(vendorData["Name"], vendorData["Data"])
+        for _, vendorData in ipairs((DataCollections.VendorData or {}).Replace or {}) do
+            VendorDataHandler:ReplaceRow(vendorData["Name"], vendorData["Data"])
         end
     end)
 end)
