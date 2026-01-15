@@ -314,56 +314,56 @@ ExecuteInGameThread(function()
 
     -- InventoryItemDetailsData
     ExecuteWithDelay(100, function()
-        Items.AddItems(DataCollections.Item.Add, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+        Items.AddItems((DataCollections.Item or {}).Add or {}, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
     end)
 
     ExecuteWithDelay(100, function()
-        for _, itemData in ipairs(DataCollections.Item.Modify) do
+        for _, itemData in ipairs((DataCollections.Item or {}).Modify or {}) do
             ItemDetailsDataHandler.ModifyRow(itemData["Name"], itemData["Data"])
         end
     end)
 
     ExecuteWithDelay(100, function()
-        Items.RemoveItems(DataCollections.Item.Remove, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+        Items.RemoveItems((DataCollections.Item or {}).Remove or {}, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
     end)
 
     -- WeaponPartStatsData
     ExecuteWithDelay(100, function()
-        for _, weaponPartStats in ipairs(DataCollections.WeaponPartStatsData.Add) do
+        for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Add or {}) do
             WeaponPartStatsDataHandler:AddRow(weaponPartStats["Name"], weaponPartStats["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
-        for _, weaponPartStats in ipairs(DataCollections.WeaponPartStatsData.Modify) do
+        for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Modify or {}) do
             WeaponPartStatsDataHandler:ModifyRow(weaponPartStats["Name"], weaponPartStats["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
-        for _, weaponPartStats in ipairs(DataCollections.WeaponPartStatsData.Remove) do
+        for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Remove or {}) do
             WeaponPartStatsDataHandler:RemoveRow(weaponPartStats["Name"])
         end
     end)
 
     -- WeaponsDetailsData
     ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs(DataCollections.WeaponsDetailsData.Add) do
+        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Add or {}) do
             WeaponsDetailsDataHandler:AddRow(weaponDetails["Name"], weaponDetails["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs(DataCollections.WeaponsDetailsData.Modify) do
+        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Modify or {}) do
             WeaponsDetailsDataHandler:ModifyRow(weaponDetails["Name"], weaponDetails["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs(DataCollections.WeaponsDetailsData.Remove) do
+        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Remove or {}) do
             WeaponsDetailsDataHandler:RemoveRow(weaponDetails["Name"])
         end
     end)
 
     -- ValueData
     ExecuteWithDelay(100, function()
-        for _, valueData in ipairs(DataCollections.ItemValue.Add) do
+        for _, valueData in ipairs((DataCollections.ItemValue or {}).Add or {}) do
             local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
             local handler = ValueHandlers[dataTableName]
             if handler then
@@ -372,7 +372,7 @@ ExecuteInGameThread(function()
         end
     end)
     ExecuteWithDelay(100, function()
-        for _, valueData in ipairs(DataCollections.ItemValue.Modify) do
+        for _, valueData in ipairs((DataCollections.ItemValue or {}).Modify or {}) do
             local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
             local handler = ValueHandlers[dataTableName]
             if handler then
@@ -381,7 +381,7 @@ ExecuteInGameThread(function()
         end
     end)
     ExecuteWithDelay(100, function()
-        for _, valueData in ipairs(DataCollections.ItemValue.Remove) do
+        for _, valueData in ipairs((DataCollections.ItemValue or {}).Remove or {}) do
             local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
             local handler = ValueHandlers[dataTableName]
             if handler then
@@ -393,31 +393,31 @@ ExecuteInGameThread(function()
     -- ManufacturingRecipes
     ExecuteWithDelay(100, function()
         CraftingRecipe.AddRecipes(
-            DataCollections.CraftingRecipe.Add,
+            (DataCollections.CraftingRecipe or {}).Add or {},
             ManufacturingRecipesHandler,
             ManufacturingTagsHandler)
     end)
     ExecuteWithDelay(100, function()
-        for _, element in ipairs(DataCollections.CraftingRecipe.Modify) do
+        for _, element in ipairs((DataCollections.CraftingRecipe or {}).Modify or {}) do
             ManufacturingRecipesHandler:ModifyRow(element["Name"], element["Data"])
         end
     end)
 
     -- ManufacturingGroups
     ExecuteWithDelay(100, function()
-        for _, group in ipairs(DataCollections.CraftingGroup.Add) do
+        for _, group in ipairs((DataCollections.CraftingGroup or {}).Add or {}) do
             ManufacturingGroupsHandler:AddRow(group["Name"], group["Data"])
         end
     end)
 
     ExecuteWithDelay(100, function()
-        for _, group in ipairs(DataCollections.CraftingGroup.Modify) do
+        for _, group in ipairs((DataCollections.CraftingGroup or {}).Modify or {}) do
             ManufacturingGroupsHandler:ModifyRow(group["Name"], group["Data"])
         end
     end)
 
     ExecuteWithDelay(100, function()
-        for _, group in ipairs(DataCollections.CraftingGroup.Remove) do
+        for _, group in ipairs((DataCollections.CraftingGroup or {}).Remove or {}) do
             ManufacturingGroupsHandler:RemoveRow(group["Name"])
         end
     end)
@@ -426,7 +426,7 @@ ExecuteInGameThread(function()
     --NOTE: Adding does work as well but doesn't make any sense yet. Once support for
     -- VendorDetailsDatatable was added it makes sense to call AddRow for VendorData as well.
     ExecuteWithDelay(100, function()
-        for _, vendorData in ipairs(DataCollections.VendorData.Modify) do
+        for _, vendorData in ipairs((DataCollections.VendorData or {}).Modify or {}) do
             VendorDataHandler:ModifyRow(vendorData["Name"], vendorData["Data"])
         end
     end)
