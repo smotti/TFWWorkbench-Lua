@@ -155,16 +155,11 @@ local function DumpDataTable()
     local output = {}
     local file = io.open(DataTable.__dumpFile, "w")
 
-    local item = dataTable:FindRow("FirstAid")
-    output["FirstAid"] = ParseFInventorItemDetails(item)
-    output["TestItem"] = ParseFInventorItemDetails(dataTable:FindRow("TestItem"))
-    --output["TestItem2"] = ParseFInventorItemDetails(dataTable:FindRow("TestItem2"))
-    --    dataTable:ForEachRow(function(rowName, rowData)
-    --        ---@cast rowName string
-    --        ---@cast rowData FInventoryItemDetails
-    --        -- Convert userdata to plain table before adding to output
-    --        output[rowName] = ParseFInventorItemDetails(rowData)
-    --    end)
+    dataTable:ForEachRow(function(rowName, rowData)
+        ---@cast rowName string
+        ---@cast rowData FInventoryItemDetails
+        output[rowName] = ParseFInventorItemDetails(rowData)
+    end)
 
     if file then
         local success, encodedJson = pcall(function() return json.encode(output) end)
