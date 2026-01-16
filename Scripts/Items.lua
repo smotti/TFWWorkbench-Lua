@@ -23,23 +23,20 @@ local function MakeItemTag(itemRowName, itemData)
     return string.format("Inventory.%s.%s", GetParentTag(itemData), itemRowName)
 end
 
-local function Add()
-end
-
 local function AddItems(items, itemDetailsDataHandler, itemTagsHandler, tagToRowHandleHandler)
     for _, item in ipairs(items) do
         Utils.Log(string.format("Adding item: %s\n", item["Name"]), "Items", "AddItems")
-        itemDetailsDataHandler.AddRow(item["Name"], item["Data"])
+        itemDetailsDataHandler:AddRow(item["Name"], item["Data"])
 
         local itemTag = MakeItemTag(item["Name"], item["Data"])
-        itemTagsHandler.AddRow(itemTag)
+        itemTagsHandler:AddRow(itemTag)
 
         local itemType = {
             Name = item["Name"],
             DataType = GetParentTag(item["Data"]),
             DataTable = Settings.DataTableClassNames.ItemDetailsData
         }
-        tagToRowHandleHandler.AddRow(itemTag, itemType)
+        tagToRowHandleHandler:AddRow(itemTag, itemType)
     end
 end
 
@@ -50,9 +47,9 @@ local function RemoveItems(items, itemDetailsDataHandler, itemTagsHandler, tagTo
             Utils.Log(string.format("Removing item: %s\n", item["Name"]), "Items", "RemoveItems")
 
             local itemTag = MakeItemTag(item["Name"], itemData)
-            itemDetailsDataHandler.RemoveRow(item["Name"])
-            itemTagsHandler.RemoveRow(itemTag)
-            tagToRowHandleHandler.RemoveRow(itemTag)
+            itemDetailsDataHandler:RemoveRow(item["Name"])
+            itemTagsHandler:RemoveRow(itemTag)
+            tagToRowHandleHandler:RemoveRow(itemTag)
         end
     end
 end

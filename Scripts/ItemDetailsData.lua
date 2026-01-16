@@ -1,10 +1,9 @@
 local json = require("json")
 local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
+local DataTable = require("DataTable")
 local DataTableParser = require("DataTableParser")
 
-
-local DataTable = {}
 
 local EItemCategory = {
     Loot = 0,
@@ -20,20 +19,13 @@ local function Log(message, funcName)
     Utils.Log(message, "ItemDetailsData", funcName)
 end
 
-local function Init(dataTable)
-    DataTable.__table = dataTable
-    DataTable.__name = "ItemDetailsData"
-    DataTable.__kismetlib = UEHelpers.GetKismetSystemLibrary()
-    DataTable.__kismetText = UEHelpers.GetKismetTextLibrary()
+local ItemDetailsData = setmetatable({}, {__index = DataTable})
+ItemDetailsData.__index = ItemDetailsData
 
-    local dirs = IterateGameDirectories()
-    local modDirs = dirs.Game.Content.Paks.Mods.TFWWorkbench
-    if not modDirs then
-        Utils.Log("No such directory Contents/Paks/TFWWorkbench", "InitHandler")
-    else
-        DataTable.__dumpFile = string.format("%s/Dumps/ItemDetailsData.json", modDirs.__absolute_path)
-        Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "InitHandler")
-    end
+function ItemDetailsData.new(dataTable)
+    local self = DataTable.new(dataTable)
+    setmetatable(self, ItemDetailsData)
+    return self
 end
 
 local function ToJsonItemMeshTransform(itemMeshTransform)
@@ -72,7 +64,7 @@ local function ToJsonEItemCategory(itemCategory)
 end
 
 ---@param data FInventoryItemDetails
-local function ParseFInventorItemDetails(data)
+function ItemDetailsData:ParseRowData(data)
     if not data then
         return {}
     end
@@ -114,32 +106,7 @@ local function ParseFInventorItemDetails(data)
     }
 end
 
-local function DumpDataTable()
-    ---@class UDataTable
-    local dataTable = DataTable.__table
-    local output = {}
-    local file = io.open(DataTable.__dumpFile, "w")
-
-    dataTable:ForEachRow(function(rowName, rowData)
-        ---@cast rowName string
-        ---@cast rowData FInventoryItemDetails
-        output[rowName] = ParseFInventorItemDetails(rowData)
-    end)
-
-    if file then
-        local success, encodedJson = pcall(function() return json.encode(output) end)
-        if success then
-            file:write(encodedJson)
-            file:close()
-            Log("Successfully wrote JSON file", "DumpDataTable")
-        else
-            file:close()
-            Log(string.format("Failed to encode JSON: %s", tostring(encodedJson)), "DumpDataTable")
-        end
-    end
-end
-
-local function AddRow(name, data)
+function ItemDetailsData:AddRow(name, data)
     ---@class FInventoryItemDetails
     local rowData = {
         Category = data["Category"],
@@ -180,14 +147,14 @@ local function AddRow(name, data)
     Log(string.format("Added row %s\n", name), "AddRow")
 end
 
-local function ReplaceRow(name, data)
-    local row = DataTable.__table:FindRow(name)
+function ItemDetailsData:ReplaceRow(name, data)
+    local row = self.__table:FindRow(name)
     if not row then
         Log(string.format("Row with name %s not found\n", name), "ReplaceRow")
         return
     end
 
-    local parsedRow = ParseFInventorItemDetails(row)
+    local parsedRow = self:ParseRowData(row)
     for field, value in pairs(data) do
         if field == "ItemType" then
             parsedRow[field] = EItemCategory[value]
@@ -199,19 +166,7 @@ local function ReplaceRow(name, data)
     end
 
     Log(string.format("Replaced row %s by calling AddRow\n", name), "ReplaceRow")
-    AddRow(name, parsedRow)
+    self:AddRow(name, parsedRow)
 end
 
-local function RemoveRow(itemId)
-    DataTable.__table:RemoveRow(itemId)
-    Log(string.format("Removed row %s\n", itemId), "RemoveRow")
-end
-
--- Export module functions
-DataTable.Init = Init
-DataTable.DumpDataTable = DumpDataTable
-DataTable.AddRow = AddRow
-DataTable.ReplaceRow = ReplaceRow
-DataTable.RemoveRow = RemoveRow
-
-return DataTable
+return ItemDetailsData

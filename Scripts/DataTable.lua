@@ -22,7 +22,7 @@ function DataTable.new(dataTable)
     self.__kismetlib = UEHelpers.GetKismetSystemLibrary()
 
     local dirs = IterateGameDirectories()
-    local modDirs = dirs.Game.Content.Paks.Mods.TFWWorkbench
+    local modDirs = dirs.Game.Content.Paks.Mods.TFWWorkbench.DataTable
     if not modDirs then
         Log("No such directory Contents/Paks/TFWWorkbench", "new")
     else

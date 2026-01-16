@@ -2,10 +2,10 @@ local json = require("json")
 local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 local Settings = require("Settings")
-local ItemDetailsDataHandler = require("ItemDetailsData")
+local ItemDetailsData = require("ItemDetailsData")
 local Items = require("Items")
-local ItemTagsHandler = require("ItemTags")
-local TagToRowHandleHandler = require("TagToRowHandle")
+local ItemTags = require("ItemTags")
+local TagToRowHandle = require("TagToRowHandle")
 local ValueHandler = require("Value")
 local ManufacturingGroups = require("ManufacturingGroups")
 local ManufacturingRecipes = require("ManufacturingRecipes")
@@ -24,20 +24,32 @@ RegisterCustomProperty({
     ["OffsetInternal"] = 0x68
 })
 
----@class UDataTable
-local ItemDetailsData
----@class UDataTable
-local ItemTags
----@class UDataTable
-local TagToRowHandle
+local DataTableClasses = {
+    ItemDetailsData = ItemDetailsData,
+    ItemTags = ItemTags,
+    TagToRowHandle = TagToRowHandle,
+    ValueHandler = ValueHandler,
+    ManufacturingGroups = ManufacturingGroups,
+    ManufacturingRecipes = ManufacturingRecipes,
+    ManufacturingTags = ManufacturingTags,
+    VendorData = VendorData,
+    WeaponsDetailsData = WeaponsDetailsData,
+    WeaponPartStatsData = WeaponPartStatsData,
+}
 
-local ManufacturingGroupsHandler = {}
-local ManufacturingRecipesHandler = {}
-local ManufacturingTagsHandler = {}
-local ValueHandlers = {}
-local VendorDataHandler = {}
-local WeaponsDetailsDataHandler = {}
-local WeaponPartStatsDataHandler = {}
+local DataTableHandlers = {
+    ItemDetailsData = {},
+    ItemTags = {},
+    ManufacturingGroups = {},
+    ManufacturingRecipes = {},
+    ManufacturingTags = {},
+    TagToRowHandle = {},
+    ValueHandler = {},
+    VendorData = {},
+    WeaponsDetailsData = {},
+    WeaponPartStatsData = {},
+}
+
 
 local DataCollections = {
     Item = {},
@@ -49,9 +61,18 @@ local DataCollections = {
     WeaponPartStatsData = {},
 }
 
+local function Log(message, funcName)
+    Utils.Log(message, "main", funcName)
+end
+
+local function GetModDir()
+    local dirs = IterateGameDirectories()
+    return dirs.Game.Content.Paks.Mods.TFWWorkbench
+end
+
 local function FindOrCreateModDir()
     local dirs = IterateGameDirectories()
-    local modDir = dirs.Game.Content.Paks.Mods.TFWWorkbench
+    local modDir = GetModDir()
 
     if modDir then
         return modDir
@@ -66,8 +87,39 @@ local function FindOrCreateModDir()
             Utils.Log(string.format("Failed to create directory: %s - %d\n", result, code))
             return nil
         else
-            local dirs = IterateGameDirectories()
-            return dirs.Game.Content.Paks.Mods.TFWWorkbench
+            return GetModDir()
+        end
+    end
+end
+
+local function CreateModChildDirs(modDir)
+    local modDirPath = modDir.__absolute_path
+
+    for parent, children in pairs(Settings.ModChildDirs) do
+        local parentDirPath = string.format("%s/%s", modDirPath, parent)
+        if not modDir[parent] then
+            Log(string.format("Creating directory %s\n", parentDirPath), "CreateModChildDirs")
+
+            local success, result, code = os.execute(string.format("mkdir \"%s\"", parentDirPath))
+            if not success then
+                Log(string.format("Failed to create directory: %s - %d\n", result, code), "CreateModChildDirs")
+                parentDirPath = ""
+            end
+        end
+
+        if parentDirPath then
+            for _, child in ipairs(children) do
+                local childDirPath = string.format("%s/%s", parentDirPath, child)
+                local failed, result, code = os.execute(
+                    string.format("if exist \"%s\" (true)", childDirPath))
+                if failed then
+                    Log(string.format("Creating directory %s\n", childDirPath), "CreateModChildDirs")
+                    local success, result, code = os.execute(string.format("mkdir \"%s\"", childDirPath))
+                    if not success then
+                        Log(string.format("Failed to create directory: %s - %d\n", result, code), "CreateModChildDirs")
+                    end
+                end
+            end
         end
     end
 end
@@ -192,56 +244,27 @@ RegisterConsoleCommandHandler("DumpDataTables", function(fullCmd, params, output
     Utils.Log(string.format("Full command: %s\n", fullCmd), "main")
 
     outputDevice:Log("Dumping data tables")
+
     --NOTE: Using async calls here to don't lock up the game thread
-    --TODO: Refactor these calls. Similar to how it's being done for the ValueHandlers
-    if IsDataTableValid(ItemDetailsData) then
-        ExecuteAsync(function() ItemDetailsDataHandler.DumpDataTable() end)
-    end
-
-    if IsDataTableValid(ItemTags) then
-        ExecuteAsync(function() ItemTagsHandler.DumpDataTable() end)
-    end
-
-    if IsDataTableValid(TagToRowHandle) then
-        ExecuteAsync(function() TagToRowHandleHandler.DumpDataTable() end)
-    end
-
-    for _, handler in pairs(ValueHandlers) do
-        if IsDataTableValid(handler.__table) then
+    for name, handler in pairs(DataTableHandlers) do
+        if name ~= "ValueHandler" then
             ExecuteAsync(function() handler:DumpDataTable() end)
         end
     end
 
-    if IsDataTableValid(ManufacturingTagsHandler.__table) then
-        ExecuteAsync(function() ManufacturingTagsHandler:DumpDataTable() end)
-    end
-
-    if IsDataTableValid(ManufacturingRecipesHandler.__table) then
-        ExecuteAsync(function() ManufacturingRecipesHandler:DumpDataTable() end)
-    end
-
-    if IsDataTableValid(ManufacturingGroupsHandler.__table) then
-        ExecuteAsync(function() ManufacturingGroupsHandler:DumpDataTable() end)
-    end
-
-    if IsDataTableValid(VendorDataHandler.__table) then
-        ExecuteAsync(function() VendorDataHandler:DumpDataTable() end)
-    end
-
-    if IsDataTableValid(WeaponsDetailsDataHandler.__table) then
-        ExecuteAsync(function() WeaponsDetailsDataHandler:DumpDataTable() end)
-    end
-
-    if IsDataTableValid(WeaponPartStatsDataHandler.__table) then
-        ExecuteAsync(function() WeaponPartStatsDataHandler:DumpDataTable() end)
+    for _, handler in pairs(DataTableHandlers.ValueHandler or {}) do
+        if IsDataTableValid(handler.__table) then
+            ExecuteAsync(function() handler:DumpDataTable() end)
+        end
     end
 
     return true
 end)
 
 ExecuteInGameThread(function()
-    -- Create mod dir if not present and collect data from mod dirs
+    -- Create mod dir and mod child dirs if not present and collect data from mod child dirs
     local modDir = FindOrCreateModDir()
+    CreateModChildDirs(modDir)
     for dirName, dir in pairs(modDir.DataTable or {}) do
         if not (dirName == "Dumps") then
             DataCollections[dirName] = CollectData(dir)
@@ -252,59 +275,21 @@ ExecuteInGameThread(function()
     InitDataTables()
 
     -- Initialize data table handlers
-    -- TODO: Refactor to remove duplication. Use the same approach, as for the ValueHandlers, for
-    -- the other handlers as well.
-    ItemDetailsData = StaticFindObject(Settings.DataTableClassNames.ItemDetailsData)
-    if IsDataTableValid(ItemDetailsData) then
-        ItemDetailsDataHandler.Init(ItemDetailsData)
-    end
-
-    ItemTags = StaticFindObject(Settings.DataTableClassNames.ItemTags)
-    if IsDataTableValid(ItemTags) then
-        ItemTagsHandler.Init(ItemTags)
-    end
-
-    TagToRowHandle = StaticFindObject(Settings.DataTableClassNames.TagToRowHandle)
-    if IsDataTableValid(TagToRowHandle) then
-        TagToRowHandleHandler.Init(TagToRowHandle)
-    end
-
-    local dataTable = StaticFindObject(Settings.DataTableClassNames.ManufacturingTags)
-    if IsDataTableValid(dataTable) then
-        ManufacturingTagsHandler = ManufacturingTags.new(dataTable)
-    end
-
-    local dataTable = StaticFindObject(Settings.DataTableClassNames.ManufacturingRecipes)
-    if IsDataTableValid(dataTable) then
-        ManufacturingRecipesHandler = ManufacturingRecipes.new(dataTable)
-    end
-
-    local dataTable = StaticFindObject(Settings.DataTableClassNames.ManufacturingGroups)
-    if IsDataTableValid(dataTable) then
-        ManufacturingGroupsHandler = ManufacturingGroups.new(dataTable)
-    end
-
-    local dataTable = StaticFindObject(Settings.DataTableClassNames.WeaponPartStatsData)
-    if IsDataTableValid(dataTable) then
-        WeaponPartStatsDataHandler = WeaponPartStatsData.new(dataTable)
+    for name, class in pairs(DataTableClasses) do
+        if name ~= "ValueHandler" then
+            local dataTable = StaticFindObject(Settings.DataTableClassNames[name])
+            if IsDataTableValid(dataTable) then
+                DataTableHandlers[name] = class.new(dataTable)
+            end
+        end
     end
 
     for _, path in ipairs(Settings.ValueTables) do
         local dataTable = StaticFindObject(path)
-        if dataTable and dataTable:IsValid() then
+        if IsDataTableValid(dataTable) then
             local dataTableName = Utils.GetDataTableName(dataTable)
-            ValueHandlers[dataTableName] = ValueHandler.new(dataTable)
+            DataTableHandlers.ValueHandler[dataTableName] = ValueHandler.new(dataTable)
         end
-    end
-
-    local dataTable = StaticFindObject(Settings.DataTableClassNames.VendorData)
-    if IsDataTableValid(dataTable) then
-        VendorDataHandler = VendorData.new(dataTable)
-    end
-
-    local dataTable = StaticFindObject(Settings.DataTableClassNames.WeaponsDetailsData)
-    if IsDataTableValid(dataTable) then
-        WeaponsDetailsDataHandler = WeaponsDetailsData.new(dataTable)
     end
 
     -- NOTE: These Add/Replace/Remove function calls could potentially also be called asynchronously
@@ -314,50 +299,58 @@ ExecuteInGameThread(function()
 
     -- InventoryItemDetailsData
     ExecuteWithDelay(100, function()
-        Items.AddItems((DataCollections.Item or {}).Add or {}, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+        Items.AddItems(
+            (DataCollections.Item or {}).Add or {},
+            DataTableHandlers.ItemDetailsData,
+            DataTableHandlers.ItemTags,
+            DataTableHandlers.TagToRowHandle)
     end)
 
     ExecuteWithDelay(100, function()
         for _, itemData in ipairs((DataCollections.Item or {}).Replace or {}) do
-            ItemDetailsDataHandler.ReplaceRow(itemData["Name"], itemData["Data"])
+            DataTableHandlers.ItemDetailsData:ReplaceRow(itemData["Name"], itemData["Data"])
         end
     end)
 
     ExecuteWithDelay(100, function()
-        Items.RemoveItems((DataCollections.Item or {}).Remove or {}, ItemDetailsDataHandler, ItemTagsHandler, TagToRowHandleHandler)
+        Items.RemoveItems(
+            (DataCollections.Item or {}).Remove or {},
+            DataTableHandlers.ItemDetailsData,
+            DataTableHandlers.ItemTags,
+            DataTableHandlers.TagToRowHandle)
     end)
 
     -- WeaponPartStatsData
     ExecuteWithDelay(100, function()
         for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Add or {}) do
-            WeaponPartStatsDataHandler:AddRow(weaponPartStats["Name"], weaponPartStats["Data"])
+            DataTableHandlers.WeaponPartStatsData:AddRow(weaponPartStats["Name"], weaponPartStats["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
         for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Replace or {}) do
-            WeaponPartStatsDataHandler:ReplaceRow(weaponPartStats["Name"], weaponPartStats["Data"])
+            DataTableHandlers.WeaponPartStatsData:ReplaceRow(weaponPartStats["Name"], weaponPartStats["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
         for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Remove or {}) do
-            WeaponPartStatsDataHandler:RemoveRow(weaponPartStats["Name"])
+            DataTableHandlers.WeaponPartStatsData:RemoveRow(weaponPartStats["Name"])
         end
     end)
 
     -- WeaponsDetailsData
     ExecuteWithDelay(100, function()
         for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Add or {}) do
-            WeaponsDetailsDataHandler:AddRow(weaponDetails["Name"], weaponDetails["Data"])
+            DataTableHandlers.WeaponsDetailsData:AddRow(weaponDetails["Name"], weaponDetails["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
         for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Replace or {}) do
-            WeaponsDetailsDataHandler:ReplaceRow(weaponDetails["Name"], weaponDetails["Data"])
+            DataTableHandlers.WeaponsDetailsData:ReplaceRow(weaponDetails["Name"], weaponDetails["Data"])
         end
     end)
     ExecuteWithDelay(100, function()
         for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Remove or {}) do
-            WeaponsDetailsDataHandler:RemoveRow(weaponDetails["Name"])
+            DataTableHandlers.WeaponsDetailsData:RemoveRow(weaponDetails["Name"])
         end
     end)
 
@@ -365,7 +358,7 @@ ExecuteInGameThread(function()
     ExecuteWithDelay(100, function()
         for _, valueData in ipairs((DataCollections.ItemValue or {}).Add or {}) do
             local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
-            local handler = ValueHandlers[dataTableName]
+            local handler = DataTableHandlers.ValueHandler[dataTableName]
             if handler then
                 handler:AddRow(valueData["Name"], valueData["Data"])
             end
@@ -374,7 +367,7 @@ ExecuteInGameThread(function()
     ExecuteWithDelay(100, function()
         for _, valueData in ipairs((DataCollections.ItemValue or {}).Replace or {}) do
             local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
-            local handler = ValueHandlers[dataTableName]
+            local handler = DataTableHandlers.ValueHandler[dataTableName]
             if handler then
                 handler:ReplaceRow(valueData["Name"], valueData["Data"])
             end
@@ -383,7 +376,7 @@ ExecuteInGameThread(function()
     ExecuteWithDelay(100, function()
         for _, valueData in ipairs((DataCollections.ItemValue or {}).Remove or {}) do
             local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
-            local handler = ValueHandlers[dataTableName]
+            local handler = DataTableHandlers.ValueHandler[dataTableName]
             if handler then
                 handler:RemoveRow(valueData["Name"])
             end
@@ -394,31 +387,31 @@ ExecuteInGameThread(function()
     ExecuteWithDelay(100, function()
         CraftingRecipe.AddRecipes(
             (DataCollections.CraftingRecipe or {}).Add or {},
-            ManufacturingRecipesHandler,
-            ManufacturingTagsHandler)
+            DataTableHandlers.ManufacturingRecipes,
+            DataTableHandlers.ManufacturingTags)
     end)
     ExecuteWithDelay(100, function()
         for _, element in ipairs((DataCollections.CraftingRecipe or {}).Replace or {}) do
-            ManufacturingRecipesHandler:ReplaceRow(element["Name"], element["Data"])
+            DataTableHandlers.ManufacturingRecipes:ReplaceRow(element["Name"], element["Data"])
         end
     end)
 
     -- ManufacturingGroups
     ExecuteWithDelay(100, function()
         for _, group in ipairs((DataCollections.CraftingGroup or {}).Add or {}) do
-            ManufacturingGroupsHandler:AddRow(group["Name"], group["Data"])
+            DataTableHandlers.ManufacturingGroups:AddRow(group["Name"], group["Data"])
         end
     end)
 
     ExecuteWithDelay(100, function()
         for _, group in ipairs((DataCollections.CraftingGroup or {}).Replace or {}) do
-            ManufacturingGroupsHandler:ReplaceRow(group["Name"], group["Data"])
+            DataTableHandlers.ManufacturingGroups:ReplaceRow(group["Name"], group["Data"])
         end
     end)
 
     ExecuteWithDelay(100, function()
         for _, group in ipairs((DataCollections.CraftingGroup or {}).Remove or {}) do
-            ManufacturingGroupsHandler:RemoveRow(group["Name"])
+            DataTableHandlers.ManufacturingGroups:RemoveRow(group["Name"])
         end
     end)
 
@@ -427,7 +420,7 @@ ExecuteInGameThread(function()
     -- VendorDetailsDatatable was added it makes sense to call AddRow for VendorData as well.
     ExecuteWithDelay(100, function()
         for _, vendorData in ipairs((DataCollections.VendorData or {}).Replace or {}) do
-            VendorDataHandler:ReplaceRow(vendorData["Name"], vendorData["Data"])
+            DataTableHandlers.VendorData:ReplaceRow(vendorData["Name"], vendorData["Data"])
         end
     end)
 end)

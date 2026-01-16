@@ -1,8 +1,8 @@
 --[[
 A module to manage rows in the `DT_TagToRowHandle` data table
 ]]
+local DataTable = require("DataTable")
 local DataTableParser = require("DataTableParser")
-local json = require("json")
 local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 
@@ -10,22 +10,13 @@ local function Log(message, funcName)
     Utils.Log(message, "TagToRowHandle", funcName)
 end
 
-local DataTable = {}
+local TagToRowHandle = setmetatable({}, {__index = DataTable})
+TagToRowHandle.__index = TagToRowHandle
 
-local function Init(dataTable)
-    DataTable.__table = dataTable
-    DataTable.__name = "TagToRowHandle"
-    DataTable.__kismetlib = UEHelpers.GetKismetSystemLibrary()
-    DataTable.__kismetText = UEHelpers.GetKismetTextLibrary()
-
-    local dirs = IterateGameDirectories()
-    local modDirs = dirs.Game.Content.Paks.Mods.TFWWorkbench
-    if not modDirs then
-        Utils.Log("No such directory Contents/Paks/TFWWorkbench", "Init")
-    else
-        DataTable.__dumpFile = string.format("%s/Dumps/DT_TagToRowHandle.json", modDirs.__absolute_path)
-        Log(string.format("DumpFile: %s\n", DataTable.__dumpFile), "Init")
-    end
+function TagToRowHandle.new(dataTable)
+    local self = DataTable.new(dataTable)
+    setmetatable(self, TagToRowHandle)
+    return self
 end
 
 local EStoreCategory = {
@@ -65,32 +56,7 @@ local function ParseFWItemType(data)
     }
 end
 
-local function DumpDataTable()
-    ---@class UDataTable
-    local dataTable = DataTable.__table
-    local output = {}
-    local file = io.open(DataTable.__dumpFile, "w")
-
-    dataTable:ForEachRow(function(rowName, rowData)
-        ---@cast rowName string
-        ---@cast rowData FFWItemType
-        output[rowName] = ParseFWItemType(rowData)
-    end)
-
-    if file then
-        local success, encodedJson = pcall(function() return json.encode(output) end)
-        if success then
-            file:write(encodedJson)
-            file:close()
-            Log("Successfully wrote JSON file", "DumpDataTable")
-        else
-            file:close()
-            Log(string.format("Failed to encode JSON: %s", tostring(encodedJson)), "DumpDataTable")
-        end
-    end
-end
-
-local function AddRow(itemTag, data)
+function TagToRowHandle:AddRow(itemTag, data)
     local fwItemType = {
         DataType = EStoreCategory[data["DataType"]],
         DataRow = {
@@ -98,11 +64,11 @@ local function AddRow(itemTag, data)
             DataTable = StaticFindObject(data["DataTable"])
         }
     }
-    DataTable.__table:AddRow(itemTag, fwItemType)
+    self.__table:AddRow(itemTag, fwItemType)
     Log(string.format("Added row %s\n", itemTag), "AddRow")
 end
 
-local function ReplaceRow(itemTag, data)
+function TagToRowHandle:ReplaceRow(itemTag, data)
     local fwItemType = {
         DataType = EStoreCategory[data["DataType"]],
         DataRow = {
@@ -110,19 +76,8 @@ local function ReplaceRow(itemTag, data)
             DataTable = StaticFindObject(data["DataRow"]["DataTable"])
         }
     }
-    DataTable.__table:AddRow(itemTag, fwItemType)
+    self.__table:AddRow(itemTag, fwItemType)
     Log(string.format("Replaced row %s - %s\n", itemTag, Utils.PrintTable(data)), "ReplaceRow")
 end
 
-local function RemoveRow(itemTag)
-    DataTable.__table:RemoveRow(itemTag)
-    Log(string.format("Removed row %s\n", itemTag), "RemoveRow")
-end
-
-DataTable.Init = Init
-DataTable.AddRow = AddRow
-DataTable.DumpDataTable = DumpDataTable
-DataTable.ReplaceRow = ReplaceRow
-DataTable.RemoveRow = RemoveRow
-
-return DataTable
+return TagToRowHandle
