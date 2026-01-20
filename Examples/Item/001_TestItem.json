@@ -75,7 +75,7 @@
         }
     },
     {
-        "Action": "Modify",
+        "Action": "Replace",
         "Name": "TestItem",
         "Data": {
             "Category": "Test"

@@ -1,7 +1,6 @@
 [
-
     {
-        "Action": "Modify",
+        "Action": "Replace",
         "Name": "WesternWeaponVendor",
         "Data": {
             "MapedItemsSold": {
@@ -17,7 +16,7 @@
         }
     },
     {
-        "Action": "Modify",
+        "Action": "AddTo",
         "Name": "WesternWeaponVendor",
         "Data": {
             "MapedWeaponsSold": {
@@ -28,8 +27,35 @@
                         "DataTable": "/Game/Blueprints/Data/WeaponsDetailsData.WeaponsDetailsData",
                         "RowName": "TestWeapon"
                     }
+                },
+                "RFL20": {
+                    "Quantity": 1,
+                    "VendorLevel": 1,
+                    "ItemRowHandle": {
+                        "RowName": "RFL20",
+                        "DataTable": "/Game/Blueprints/Data/WeaponsDetailsData.WeaponsDetailsData"
+                    }
                 }
             }
+        }
+    },
+    {
+        "Action": "RemoveFrom",
+        "Name": "WesternWeaponVendor",
+        "Data": {
+            "MapedWeaponsSold": {
+                "GRL01": {},
+                "SHG01": {}
+            }
+        }
+    },
+    {
+        "Action": "ModifyIn",
+        "Name": "WesternWeaponVendor",
+        "Data": {
+            "MapedWeaponsSold.TestWeapon": {
+                "Quantity": 1
+            } 
         }
     }
 ]

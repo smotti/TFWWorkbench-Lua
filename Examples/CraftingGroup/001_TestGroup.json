@@ -20,7 +20,7 @@
         }
     },
     {
-        "Action": "Modify",
+        "Action": "Replace",
         "Name": "CryoAmmo",
         "Data": {
             "ManufactoringRecipies": [

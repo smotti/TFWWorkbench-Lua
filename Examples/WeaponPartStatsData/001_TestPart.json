@@ -24,7 +24,7 @@
         }
     },
     {
-        "Action": "Modify",
+        "Action": "Replace",
         "Name": "TestPart",
         "Data": {
             "MagazineCapacity": 100

@@ -5,16 +5,6 @@ local DataTable = require("DataTable")
 local DataTableParser = require("DataTableParser")
 
 
-local EItemCategory = {
-    Loot = 0,
-    Weapon = 1,
-    Ammo = 2,
-    MedicalSupplies = 3,
-    General = 4,
-    Dangle = 5,
-    EItemCategory_MAX = 6,
-}
-
 local function Log(message, funcName)
     Utils.Log(message, "ItemDetailsData", funcName)
 end
@@ -49,20 +39,6 @@ local function ToJsonItemMeshTransform(itemMeshTransform)
     return result
 end
 
-local function ToJsonEItemCategory(itemCategory)
-    local categories = {
-        [0] = "Loot",
-        [1] = "Weapon",
-        [2] = "Ammo",
-        [3] = "MedicalSupplies",
-        [4] = "General",
-        [5] = "Dangle",
-        [6] = "EItemCategory_Max"
-    }
-    Log(string.format("ItemType: %s - %d\n", categories[itemCategory], itemCategory), "ToJsonEItemCategory")
-    return categories[itemCategory]
-end
-
 ---@param data FInventoryItemDetails
 function ItemDetailsData:ParseRowData(data)
     if not data then
@@ -82,7 +58,7 @@ function ItemDetailsData:ParseRowData(data)
         ItemLootRadius = DataTableParser.ToJson(data.ItemLootRadius, kismetLib),
         ItemIconRadius = DataTableParser.ToJson(data.ItemIconRadius, kismetLib),
         ItemIcon = DataTableParser.ToJson(data.ItemIcon, kismetLib),
-        ItemType = ToJsonEItemCategory(data.ItemType),
+        ItemType = DataTableParser.ToJsonEItemCategory(data.ItemType),
         ItemSubtype = DataTableParser.ToJson(data.ItemSubtype, kismetLib),
         ExtraDetailsRowName = DataTableParser.ToJson(data.ExtraDetailsRowName, kismetLib),
         LootSound = DataTableParser.ToJson(data.LootSound, kismetLib),
@@ -119,7 +95,7 @@ function ItemDetailsData:AddRow(name, data)
         ItemLootRadius = data["ItemLootRadius"],
         ItemIconRadius = data["ItemIconRadius"],
         ItemIcon = data["ItemIcon"],
-        ItemType = EItemCategory[data["ItemType"]],
+        ItemType = DataTableParser.EItemCategory[data["ItemType"]],
         ItemSubtype = data["ItemSubtype"],
         ExtraDetailsRowName = "None",
         LootSound = data["LootSound"],

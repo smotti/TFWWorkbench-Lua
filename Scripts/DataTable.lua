@@ -1,4 +1,5 @@
 local json = require("json")
+local RowData = require("DataTableRowData")
 local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 
@@ -11,7 +12,8 @@ local DataTable = {
     __table = nil,
     __name = "",
     __dumpFile = "",
-    __kismetlib = nil
+    __kismetlib = nil,
+    RowData = {}
 }
 DataTable.__index = DataTable
 
@@ -20,6 +22,7 @@ function DataTable.new(dataTable)
     self.__table = dataTable
     self.__name = Utils.GetDataTableName(dataTable)
     self.__kismetlib = UEHelpers.GetKismetSystemLibrary()
+    self.RowData = RowData.new(self)
 
     local dirs = IterateGameDirectories()
     local modDirs = dirs.Game.Content.Paks.Mods.TFWWorkbench.DataTable
@@ -67,7 +70,7 @@ end
 function DataTable:ReplaceRow(name, data)
     local row = self.__table:FindRow(name)
     if not row then
-        Log(string.format("Failed to find row %s\n", name), "ModifyRow")
+        Log(string.format("Failed to find row %s\n", name), "ReplaceRow")
         return
     end
 

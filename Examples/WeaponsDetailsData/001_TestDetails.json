@@ -93,7 +93,7 @@
         }
     },
     {
-        "Action": "Modify",
+        "Action": "Replace",
         "Name": "TestWeapon",
         "Data": {
             "ExtraTooltip": "Hello there!"
@@ -102,5 +102,27 @@
     {
         "Action": "Remove",
         "Name": "RFL29"
+    },
+    {
+        "Action": "RemoveFrom",
+        "Name": "HRF01",
+        "Data": {
+            "AllowTags.GameplayTags": [
+                {
+                    "TagName": "Pawn.Player.OldMan"
+                }
+            ]
+        }
+    },
+    {
+        "Action": "AddTo",
+        "Name": "HRF01",
+        "Data": {
+            "AllowTags.GameplayTags": [
+                {
+                    "TagName": "Pawn.Player.Girl"
+                }
+            ]
+        }
     }
 ]

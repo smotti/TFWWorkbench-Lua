@@ -10,7 +10,7 @@
         }
     },
     {
-        "Action": "Modify",
+        "Action": "Replace",
         "Name": "TestItem",
         "Data": {
             "DataTable": "/Game/Blueprints/Data/Value/LEGACY_ItemValueOverrideData.LEGACY_ItemValueOverrideData",

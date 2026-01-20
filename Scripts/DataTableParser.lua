@@ -5,6 +5,30 @@ local function Log(message, funcName)
     Utils.Log(message, "DataTableParser", funcName)
 end
 
+local EItemCategory = {
+    Loot = 0,
+    Weapon = 1,
+    Ammo = 2,
+    MedicalSupplies = 3,
+    General = 4,
+    Dangle = 5,
+    EItemCategory_MAX = 6,
+}
+
+local function ToJsonEItemCategory(itemCategory)
+    local categories = {
+        [0] = "Loot",
+        [1] = "Weapon",
+        [2] = "Ammo",
+        [3] = "MedicalSupplies",
+        [4] = "General",
+        [5] = "Dangle",
+        [6] = "EItemCategory_Max"
+    }
+    Log(string.format("ItemType: %s - %d\n", categories[itemCategory], itemCategory), "ToJsonEItemCategory")
+    return categories[itemCategory]
+end
+
 local TacCamColours = {
     Default = 0,
     Green = 1,
@@ -95,7 +119,9 @@ local function ToJson(value, kismetLib)
 end
 
 return {
+    EItemCategory = EItemCategory,
     TacCamColours = TacCamColours,
     ToJson = ToJson,
+    ToJsonEItemCategory = ToJsonEItemCategory,
     ToJsonTacCamHighlight = ToJsonTacCamHighlight
 }

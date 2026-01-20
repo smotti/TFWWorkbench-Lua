@@ -49,8 +49,22 @@ local function PrintTable(o)
     end
 end
 
+-- Modified version of: https://stackoverflow.com/a/52697380
+local function IsArray(o)
+    return type(o) == "table" and (#o > 0 or next(o) == nil)
+end
+
+-- NOTE That there's no way to distinguish between an empty "array"
+-- or "map". Which shouldn't really matter as the UE4SS and the UE4
+-- relfection system should take care of that.
+local function IsMap(o)
+    return type(o) == "table" and (#o == 0 or next(o) == nil)
+end
+
 return {
     GetDataTableName = GetDataTableName,
+    IsArray = IsArray,
+    IsMap = IsMap,
     Log = Log,
     PrintTable = PrintTable
 }
