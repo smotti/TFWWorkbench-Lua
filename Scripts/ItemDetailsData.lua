@@ -1,8 +1,6 @@
-local json = require("json")
-local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 local DataTable = require("DataTable")
-local DataTableParser = require("DataTableParser")
+local Parser = require("DataTableParser")
 
 
 local function Log(message, funcName)
@@ -45,40 +43,40 @@ function ItemDetailsData:ParseRowData(data)
         return {}
     end
 
-    local kismetLib = DataTable.__kismetlib
+    local kismetLib = self.__kismetlib
     return {
-        Category = DataTableParser.ToJson(data.Category, kismetLib),
-        ItemName = DataTableParser.ToJson(data.ItemName, kismetLib),
-        ItemDescription = DataTableParser.ToJson(data.ItemDescription, kismetLib),
-        ItemMesh = DataTableParser.ToJson(data.ItemMesh, kismetLib),
+        Category = Parser.ToJson(data.Category, kismetLib),
+        ItemName = Parser.ToJson(data.ItemName, kismetLib),
+        ItemDescription = Parser.ToJson(data.ItemDescription, kismetLib),
+        ItemMesh = Parser.ToJson(data.ItemMesh, kismetLib),
         ItemMeshTransform = ToJsonItemMeshTransform(data.ItemMeshTransform),
         -- We don't care about these two properties as they're always nil
         --ExtraMeshs = nil,
         --ExtraMeshTransform = nil,
-        ItemLootRadius = DataTableParser.ToJson(data.ItemLootRadius, kismetLib),
-        ItemIconRadius = DataTableParser.ToJson(data.ItemIconRadius, kismetLib),
-        ItemIcon = DataTableParser.ToJson(data.ItemIcon, kismetLib),
-        ItemType = DataTableParser.ToJsonEItemCategory(data.ItemType),
-        ItemSubtype = DataTableParser.ToJson(data.ItemSubtype, kismetLib),
-        ExtraDetailsRowName = DataTableParser.ToJson(data.ExtraDetailsRowName, kismetLib),
-        LootSound = DataTableParser.ToJson(data.LootSound, kismetLib),
-        DropSound = DataTableParser.ToJson(data.DropSound, kismetLib),
-        ItemSize = DataTableParser.ToJson(data.ItemSize, kismetLib),
-        Volume = DataTableParser.ToJson(data.Volume, kismetLib),
-        Weight = DataTableParser.ToJson(data.Weight, kismetLib),
-        ValueRow = DataTableParser.ToJson(data.ValueRow, kismetLib),
+        ItemLootRadius = Parser.ToJson(data.ItemLootRadius, kismetLib),
+        ItemIconRadius = Parser.ToJson(data.ItemIconRadius, kismetLib),
+        ItemIcon = Parser.ToJson(data.ItemIcon, kismetLib),
+        ItemType = Parser.ToJsonEItemCategory(data.ItemType),
+        ItemSubtype = Parser.ToJson(data.ItemSubtype, kismetLib),
+        ExtraDetailsRowName = Parser.ToJson(data.ExtraDetailsRowName, kismetLib),
+        LootSound = Parser.ToJson(data.LootSound, kismetLib),
+        DropSound = Parser.ToJson(data.DropSound, kismetLib),
+        ItemSize = Parser.ToJson(data.ItemSize, kismetLib),
+        Volume = Parser.ToJson(data.Volume, kismetLib),
+        Weight = Parser.ToJson(data.Weight, kismetLib),
+        ValueRow = Parser.ToJson(data.ValueRow, kismetLib),
         -- Ignoring them because they are always 0
         --Value = ToJson(data.Value),
         --WaterValue = ToJson(data.WaterValue),
-        DropOnDeath = DataTableParser.ToJson(data.DropOnDeath, kismetLib),
-        MaxStack = DataTableParser.ToJson(data.MaxStack, kismetLib),
-        ExtraTagData = DataTableParser.ToJson(data.ExtraTagData, kismetLib),
-        StartingStack = DataTableParser.ToJson(data.StartingStack, kismetLib),
-        ConsumableAbility = DataTableParser.ToJson(data.ConsumableAbility, kismetLib),
-        BattlepointsRowHandle = DataTableParser.ToJson(data.BattlepointsRowHandle, kismetLib),
-        TacCamHighlight = DataTableParser.ToJsonTacCamHighlight(data.TacCamHighlight),
-        RareLootCategory = DataTableParser.ToJson(data.RareLootCategory, kismetLib),
-        RareLootLocations = DataTableParser.ToJson(data.RareLootLocations, kismetLib)
+        DropOnDeath = Parser.ToJson(data.DropOnDeath, kismetLib),
+        MaxStack = Parser.ToJson(data.MaxStack, kismetLib),
+        ExtraTagData = Parser.ToJson(data.ExtraTagData, kismetLib),
+        StartingStack = Parser.ToJson(data.StartingStack, kismetLib),
+        ConsumableAbility = Parser.ToJson(data.ConsumableAbility, kismetLib),
+        BattlepointsRowHandle = Parser.ToJson(data.BattlepointsRowHandle, kismetLib),
+        TacCamHighlight = Parser.ToJsonTacCamHighlight(data.TacCamHighlight),
+        RareLootCategory = Parser.ToJson(data.RareLootCategory, kismetLib),
+        RareLootLocations = Parser.ToJson(data.RareLootLocations, kismetLib)
     }
 end
 
@@ -95,7 +93,7 @@ function ItemDetailsData:AddRow(name, data)
         ItemLootRadius = data["ItemLootRadius"],
         ItemIconRadius = data["ItemIconRadius"],
         ItemIcon = data["ItemIcon"],
-        ItemType = DataTableParser.EItemCategory[data["ItemType"]],
+        ItemType = Parser.EItemCategory[data["ItemType"]],
         ItemSubtype = data["ItemSubtype"],
         ExtraDetailsRowName = "None",
         LootSound = data["LootSound"],
@@ -112,7 +110,7 @@ function ItemDetailsData:AddRow(name, data)
         StartingStack = data["StartingStack"],
         ConsumableAbility = data["ConsumableAbility"],
         BattlepointsRowHandle = data["BattlepointsRowHandle"],
-        TacCamHighlight = DataTableParser.TacCamColours[data["TacCamHighlight"]],
+        TacCamHighlight = Parser.TacCamColours[data["TacCamHighlight"]],
         RareLootCategory = data["RareLootCategory"],
         RareLootLocations = data["RareLootLocations"]
     }
@@ -133,9 +131,9 @@ function ItemDetailsData:ReplaceRow(name, data)
     local parsedRow = self:ParseRowData(row)
     for field, value in pairs(data) do
         if field == "ItemType" then
-            parsedRow[field] = EItemCategory[value]
+            parsedRow[field] = Parser.EItemCategory[value]
         elseif field == "TacCamHighlight" then
-            parsedRow[field] = DataTableParser.TacCamColours[value]
+            parsedRow[field] = Parser.TacCamColours[value]
         else
             parsedRow[field] = value
         end
