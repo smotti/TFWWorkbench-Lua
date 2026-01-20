@@ -14,6 +14,7 @@ Settings.DataTableClassNames = {
     ManufacturingTags = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringTags.DT_ManufactoringTags",
     TagToRowHandle = "/Game/Blueprints/Data/DataReference/DT_TagToRowHandle.DT_TagToRowHandle",
     VendorData = "/Game/Blueprints/Data/VendorDataTable.VendorDataTable",
+    WeaponConfigSetup = "/Game/WPN_Weapons/WPN_ConfigTool/Setup/WPN/DT_WPN_Config_Setup.DT_WPN_Config_Setup",
     WeaponsDetailsData = "/Game/Blueprints/Data/WeaponsDetailsData.WeaponsDetailsData",
     WeaponPartStatsData = "/Game/FW/Weapons/Customizer/WeaponPartStatsData.WeaponPartStatsData"
 }
@@ -33,24 +34,22 @@ Settings.ValueTables = {
 -- Required data of data tables who need to call the AddDataTableRow of the mod's DLL
 Settings.DataTables = {
     InventoryItemDetails = {
-        Path = "/Game/Blueprints/Data/ItemDetailsData.ItemDetailsData",
-        SourceRow = "FirstAid"
+        Path = "/Game/Blueprints/Data/ItemDetailsData.ItemDetailsData"
     },
     ManufacturingGroups = {
-        Path = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringGroups.DT_ManufactoringGroups",
-        SourceRow = "CryoAmmo"
+        Path = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringGroups.DT_ManufactoringGroups"
     },
     ManufacturingRecipes = {
-        Path = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringRecipies.DT_ManufactoringRecipies",
-        SourceRow = "DA_CigarettesForCryo545"
+        Path = "/Game/FW/UI/Manufactoring/Data/DT_ManufactoringRecipies.DT_ManufactoringRecipies"
     },
     VendorData = {
-        Path = "/Game/Blueprints/Data/VendorDataTable.VendorDataTable",
-        SourceRow = "WesternWeaponVendor"
+        Path = "/Game/Blueprints/Data/VendorDataTable.VendorDataTable"
     },
     WeaponsDetailsData = {
-        Path = "/Game/Blueprints/Data/WeaponsDetailsData.WeaponsDetailsData",
-        SourceRow = "RFL01A_Surplus"
+        Path = "/Game/Blueprints/Data/WeaponsDetailsData.WeaponsDetailsData"
+    },
+    WeaponConfigSetup = {
+        Path = "/Game/WPN_Weapons/WPN_ConfigTool/Setup/WPN/DT_WPN_Config_Setup.DT_WPN_Config_Setup"
     }
 }
 

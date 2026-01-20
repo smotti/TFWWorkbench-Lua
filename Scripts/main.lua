@@ -12,6 +12,7 @@ local ManufacturingRecipes = require("ManufacturingRecipes")
 local ManufacturingTags = require("ManufacturingTags")
 local CraftingRecipe = require("CraftingRecipe")
 local VendorData = require("VendorData")
+local WeaponConfigSetup = require("WeaponConfigSetup")
 local WeaponsDetailsData = require("WeaponsDetailsData")
 local WeaponPartStatsData = require("WeaponPartStatsData")
 
@@ -33,6 +34,7 @@ local DataTableClasses = {
     ManufacturingRecipes = ManufacturingRecipes,
     ManufacturingTags = ManufacturingTags,
     VendorData = VendorData,
+    WeaponConfigSetup = WeaponConfigSetup,
     WeaponsDetailsData = WeaponsDetailsData,
     WeaponPartStatsData = WeaponPartStatsData,
 }
@@ -46,6 +48,7 @@ local DataTableHandlers = {
     TagToRowHandle = {},
     ValueHandler = {},
     VendorData = {},
+    WeaponConfigSetup = {},
     WeaponsDetailsData = {},
     WeaponPartStatsData = {},
 }
@@ -57,6 +60,7 @@ local DataCollections = {
     CraftingRecipe = {},
     CraftingGroup = {},
     VendorData = {},
+    WeaponConfigSetup = {},
     WeaponsDetailsData = {},
     WeaponPartStatsData = {},
 }
@@ -253,7 +257,7 @@ end
 -- Providing the DLL part of the mod with the required data table data
 local function InitDataTables()
     for tableName, details in pairs(Settings.DataTables) do
-        ConfigureDataTables(tableName, details.Path, details.SourceRow)
+        ConfigureDataTables(tableName, details.Path)
     end
 end
 
@@ -420,6 +424,51 @@ ExecuteInGameThread(function()
         for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).RemoveFrom or {}) do
             for propertyName, value in pairs(weaponDetails["Data"]) do
                 DataTableHandlers.WeaponsDetailsData.RowData:RemoveFrom(weaponDetails["Name"], propertyName, value)
+            end
+        end
+    end)
+
+    -- WeaponConfigSetup
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).Add or {}) do
+            DataTableHandlers.WeaponConfigSetup:AddRow(weaponDetails["Name"], weaponDetails["Data"])
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).Replace or {}) do
+            DataTableHandlers.WeaponConfigSetup:ReplaceRow(weaponDetails["Name"], weaponDetails["Data"])
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).Remove or {}) do
+            DataTableHandlers.WeaponConfigSetup:RemoveRow(weaponDetails["Name"])
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).RemoveFrom or {}) do
+            for propertyName, value in pairs(weaponDetails["Data"]) do
+                DataTableHandlers.WeaponConfigSetup.RowData:RemoveFrom(weaponDetails["Name"], propertyName, value)
+            end
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).AddTo or {}) do
+            for propertyName, value in pairs(weaponDetails["Data"]) do
+                DataTableHandlers.WeaponConfigSetup.RowData:AddTo(weaponDetails["Name"], propertyName, value)
+            end
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).ModifyIn or {}) do
+            for propertyName, value in pairs(weaponDetails["Data"]) do
+                DataTableHandlers.WeaponConfigSetup.RowData:ModifyIn(weaponDetails["Name"], propertyName, value)
+            end
+        end
+    end)
+    ExecuteWithDelay(100, function()
+        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).RemoveFrom or {}) do
+            for propertyName, value in pairs(weaponDetails["Data"]) do
+                DataTableHandlers.WeaponConfigSetup.RowData:RemoveFrom(weaponDetails["Name"], propertyName, value)
             end
         end
     end)
