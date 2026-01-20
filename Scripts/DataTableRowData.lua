@@ -4,7 +4,6 @@
 -- This abstraction allows for adding new items to those, removing a specific
 -- one or modifying one within them.
 
-local Parser = require("DataTableParser")
 local Utils = require("utils")
 
 
@@ -172,13 +171,7 @@ function DataTableRowData:ModifyIn(rowName, propertyName, newElement)
 
     if Utils.IsMap(propertyValue) then
         for k, v in pairs(newElement) do
-            local newValue = v
-            if k == "ItemType" then
-                newValue = Parser.EItemCategory[v]
-            elseif k == "TacCamHighlight" then
-                newValue = Parser.TacCamColours[v]
-            end
-            propertyValue[k] = newValue
+            propertyValue[k] = v
         end
     else
         return
