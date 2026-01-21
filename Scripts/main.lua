@@ -2,6 +2,7 @@ local json = require("json")
 local UEHelpers = require("UEHelpers")
 local Utils = require("utils")
 local Settings = require("Settings")
+local DataProcessor = require("DataProcessor")
 local ItemDetailsData = require("ItemDetailsData")
 local Items = require("Items")
 local ItemTags = require("ItemTags")
@@ -320,294 +321,73 @@ ExecuteInGameThread(function()
     -- take a bit longer to load into the main menu.
 
     -- InventoryItemDetailsData
-    ExecuteWithDelay(100, function()
-        Items.AddItems(
-            (DataCollections.Item or {}).Add or {},
-            DataTableHandlers.ItemDetailsData,
-            DataTableHandlers.ItemTags,
-            DataTableHandlers.TagToRowHandle)
-    end)
-
-    ExecuteWithDelay(100, function()
-        for _, itemData in ipairs((DataCollections.Item or {}).Replace or {}) do
-            DataTableHandlers.ItemDetailsData:ReplaceRow(itemData["Name"], itemData["Data"])
-        end
-    end)
-
-    ExecuteWithDelay(100, function()
-        Items.RemoveItems(
-            (DataCollections.Item or {}).Remove or {},
-            DataTableHandlers.ItemDetailsData,
-            DataTableHandlers.ItemTags,
-            DataTableHandlers.TagToRowHandle)
-    end)
-
-    ExecuteWithDelay(100, function()
-        for _, item in ipairs((DataCollections.Item or {}).AddTo or {}) do
-            for propertyName, value in pairs(item["Data"]) do
-                DataTableHandlers.ItemDetailsData.RowData:AddTo(item["Name"], propertyName, value)
+    DataProcessor.ProcessFull(
+        DataCollections.Item,
+        DataTableHandlers.ItemDetailsData,
+        {
+            AddFn = function(items, handler)
+                Items.AddItems(items, handler, DataTableHandlers.ItemTags, DataTableHandlers.TagToRowHandle)
+            end,
+            RemoveFn = function(items, handler)
+                Items.RemoveItems(items, handler, DataTableHandlers.ItemTags, DataTableHandlers.TagToRowHandle)
             end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, item in ipairs((DataCollections.Item or {}).ModifyIn or {}) do
-            for propertyName, value in pairs(item["Data"]) do
-                DataTableHandlers.ItemDetailsData.RowData:ModifyIn(item["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, item in ipairs((DataCollections.Item or {}).RemoveFrom or {}) do
-            for propertyName, value in pairs(item["Data"]) do
-                DataTableHandlers.ItemDetailsData.RowData:RemoveFrom(item["Name"], propertyName, value)
-            end
-        end
-    end)
+        }
+    )
 
     -- WeaponPartStatsData
     -- No need to support AddTo, ModifyIn, or RemoveFrom. As the row data is flat and only consists
     -- of basic data types. Meaning Replace is sufficient.
-    ExecuteWithDelay(100, function()
-        for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Add or {}) do
-            DataTableHandlers.WeaponPartStatsData:AddRow(weaponPartStats["Name"], weaponPartStats["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Replace or {}) do
-            DataTableHandlers.WeaponPartStatsData:ReplaceRow(weaponPartStats["Name"], weaponPartStats["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponPartStats in ipairs((DataCollections.WeaponPartStatsData or {}).Remove or {}) do
-            DataTableHandlers.WeaponPartStatsData:RemoveRow(weaponPartStats["Name"])
-        end
-    end)
+    DataProcessor.ProcessBasic(
+        DataCollections.WeaponPartStatsData,
+        DataTableHandlers.WeaponPartStatsData
+    )
 
     -- WeaponsDetailsData
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Add or {}) do
-            DataTableHandlers.WeaponsDetailsData:AddRow(weaponDetails["Name"], weaponDetails["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Replace or {}) do
-            DataTableHandlers.WeaponsDetailsData:ReplaceRow(weaponDetails["Name"], weaponDetails["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).Remove or {}) do
-            DataTableHandlers.WeaponsDetailsData:RemoveRow(weaponDetails["Name"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).RemoveFrom or {}) do
-            for propertyName, value in pairs(weaponDetails["Data"]) do
-                DataTableHandlers.WeaponsDetailsData.RowData:RemoveFrom(weaponDetails["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).AddTo or {}) do
-            for propertyName, value in pairs(weaponDetails["Data"]) do
-                DataTableHandlers.WeaponsDetailsData.RowData:AddTo(weaponDetails["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).ModifyIn or {}) do
-            for propertyName, value in pairs(weaponDetails["Data"]) do
-                DataTableHandlers.WeaponsDetailsData.RowData:ModifyIn(weaponDetails["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponsDetailsData or {}).RemoveFrom or {}) do
-            for propertyName, value in pairs(weaponDetails["Data"]) do
-                DataTableHandlers.WeaponsDetailsData.RowData:RemoveFrom(weaponDetails["Name"], propertyName, value)
-            end
-        end
-    end)
+    DataProcessor.ProcessFull(
+        DataCollections.WeaponsDetailsData,
+        DataTableHandlers.WeaponsDetailsData
+    )
 
     -- WeaponConfigSetup
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).Add or {}) do
-            DataTableHandlers.WeaponConfigSetup:AddRow(weaponDetails["Name"], weaponDetails["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).Replace or {}) do
-            DataTableHandlers.WeaponConfigSetup:ReplaceRow(weaponDetails["Name"], weaponDetails["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).Remove or {}) do
-            DataTableHandlers.WeaponConfigSetup:RemoveRow(weaponDetails["Name"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).RemoveFrom or {}) do
-            for propertyName, value in pairs(weaponDetails["Data"]) do
-                DataTableHandlers.WeaponConfigSetup.RowData:RemoveFrom(weaponDetails["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).AddTo or {}) do
-            for propertyName, value in pairs(weaponDetails["Data"]) do
-                DataTableHandlers.WeaponConfigSetup.RowData:AddTo(weaponDetails["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).ModifyIn or {}) do
-            for propertyName, value in pairs(weaponDetails["Data"]) do
-                DataTableHandlers.WeaponConfigSetup.RowData:ModifyIn(weaponDetails["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, weaponDetails in ipairs((DataCollections.WeaponConfigSetup or {}).RemoveFrom or {}) do
-            for propertyName, value in pairs(weaponDetails["Data"]) do
-                DataTableHandlers.WeaponConfigSetup.RowData:RemoveFrom(weaponDetails["Name"], propertyName, value)
-            end
-        end
-    end)
+    DataProcessor.ProcessFull(
+        DataCollections.WeaponConfigSetup,
+        DataTableHandlers.WeaponConfigSetup
+    )
 
     -- ValueData
     -- No need to support AddTo, ModifyIn, or RemoveFrom. As the row data is flat and only consists
     -- of basic data types. Meaning Replace is sufficient.
-    ExecuteWithDelay(100, function()
-        for _, valueData in ipairs((DataCollections.ItemValue or {}).Add or {}) do
-            local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
-            local handler = DataTableHandlers.ValueHandler[dataTableName]
-            if handler then
-                handler:AddRow(valueData["Name"], valueData["Data"])
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, valueData in ipairs((DataCollections.ItemValue or {}).Replace or {}) do
-            local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
-            local handler = DataTableHandlers.ValueHandler[dataTableName]
-            if handler then
-                handler:ReplaceRow(valueData["Name"], valueData["Data"])
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, valueData in ipairs((DataCollections.ItemValue or {}).Remove or {}) do
-            local dataTableName = Utils.GetDataTableName(valueData["Data"]["DataTable"])
-            local handler = DataTableHandlers.ValueHandler[dataTableName]
-            if handler then
-                handler:RemoveRow(valueData["Name"])
-            end
-        end
-    end)
+    DataProcessor.ProcessWithDynamicHandler(
+        DataCollections.ItemValue,
+        DataTableHandlers.ValueHandler
+    )
 
     -- ManufacturingRecipes
-    ExecuteWithDelay(100, function()
-        CraftingRecipe.AddRecipes(
-            (DataCollections.CraftingRecipe or {}).Add or {},
-            DataTableHandlers.ManufacturingRecipes,
-            DataTableHandlers.ManufacturingTags)
-    end)
-    ExecuteWithDelay(100, function()
-        for _, recipe in ipairs((DataCollections.CraftingRecipe or {}).Remove or {}) do
-            DataTableHandlers.ManufacturingRecipes:RemoveRow(recipe["Name"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, recipe in ipairs((DataCollections.CraftingRecipe or {}).Replace or {}) do
-            DataTableHandlers.ManufacturingRecipes:ReplaceRow(recipe["Name"], recipe["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, recipe in ipairs((DataCollections.CraftingRecipe or {}).AddTo or {}) do
-            for propertyName, value in pairs(recipe["Data"]) do
-                DataTableHandlers.ManufacturingRecipes.RowData:AddTo(recipe["Name"], propertyName, value)
+    DataProcessor.ProcessFull(
+        DataCollections.CraftingRecipe,
+        DataTableHandlers.ManufacturingRecipes,
+        {
+            AddFn = function(recipes, handler)
+                CraftingRecipe.AddRecipes(recipes, handler, DataTableHandlers.ManufacturingTags)
             end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, recipe in ipairs((DataCollections.CraftingRecipe or {}).ModifyIn or {}) do
-            for propertyName, value in pairs(recipe["Data"]) do
-                DataTableHandlers.ManufacturingRecipes.RowData:ModifyIn(recipe["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, recipe in ipairs((DataCollections.CraftingRecipe or {}).RemoveFrom or {}) do
-            for propertyName, value in pairs(recipe["Data"]) do
-                DataTableHandlers.ManufacturingRecipes.RowData:RemoveFrom(recipe["Name"], propertyName, value)
-            end
-        end
-    end)
+        }
+    )
 
     -- ManufacturingGroups
-    ExecuteWithDelay(100, function()
-        for _, group in ipairs((DataCollections.CraftingGroup or {}).Add or {}) do
-            DataTableHandlers.ManufacturingGroups:AddRow(group["Name"], group["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, group in ipairs((DataCollections.CraftingGroup or {}).Replace or {}) do
-            DataTableHandlers.ManufacturingGroups:ReplaceRow(group["Name"], group["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, group in ipairs((DataCollections.CraftingGroup or {}).Remove or {}) do
-            DataTableHandlers.ManufacturingGroups:RemoveRow(group["Name"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, group in ipairs((DataCollections.CraftingGroup or {}).AddTo or {}) do
-            for propertyName, value in pairs(group["Data"]) do
-                DataTableHandlers.ManufacturingGroups.RowData:AddTo(group["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, group in ipairs((DataCollections.CraftingGroup or {}).ModifyIn or {}) do
-            for propertyName, value in pairs(group["Data"]) do
-                DataTableHandlers.ManufacturingGroups.RowData:ModifyIn(group["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, group in ipairs((DataCollections.CraftingGroup or {}).RemoveFrom or {}) do
-            for propertyName, value in pairs(group["Data"]) do
-                DataTableHandlers.ManufacturingGroups.RowData:RemoveFrom(group["Name"], propertyName, value)
-            end
-        end
-    end)
+    DataProcessor.ProcessFull(
+        DataCollections.CraftingGroup,
+        DataTableHandlers.ManufacturingGroups
+    )
 
     -- VendorData
     --NOTE: Adding does work as well but doesn't make any sense yet. Once support for
     -- VendorDetailsDatatable was added it makes sense to call AddRow for VendorData as well.
-    ExecuteWithDelay(100, function()
-        for _, vendorData in ipairs((DataCollections.VendorData or {}).Replace or {}) do
-            DataTableHandlers.VendorData:ReplaceRow(vendorData["Name"], vendorData["Data"])
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, vendorData in ipairs((DataCollections.VendorData or {}).AddTo or {}) do
-            for propertyName, value in pairs(vendorData["Data"]) do
-                DataTableHandlers.VendorData.RowData:AddTo(vendorData["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, vendorData in ipairs((DataCollections.VendorData or {}).ModifyIn or {}) do
-            for propertyName, value in pairs(vendorData["Data"]) do
-                DataTableHandlers.VendorData.RowData:ModifyIn(vendorData["Name"], propertyName, value)
-            end
-        end
-    end)
-    ExecuteWithDelay(100, function()
-        for _, vendorData in ipairs((DataCollections.VendorData or {}).RemoveFrom or {}) do
-            for propertyName, value in pairs(vendorData["Data"]) do
-                DataTableHandlers.VendorData.RowData:RemoveFrom(vendorData["Name"], propertyName, value)
-            end
-        end
-    end)
+    DataProcessor.ProcessFull(
+        DataCollections.VendorData,
+        DataTableHandlers.VendorData,
+        {
+            SupportAdd = false,
+            SupportRemove = false
+        }
+    )
 end)
